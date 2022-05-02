@@ -8,6 +8,8 @@ use net\authorize\api\controller as AnetController;
 
 class CustomerProfile {
 
+    const RESPONSE_OK = "Ok";
+
     public $endpoint;
     public $profileId;
     
@@ -63,7 +65,7 @@ class CustomerProfile {
 
     public function hasErrors($response) {
 
-        return $response->getMessages()->getResultCode() != "Ok";
+        return $response->getMessages()->getResultCode() != self::RESPONSE_OK;
     }
 }
 
