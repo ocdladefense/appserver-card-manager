@@ -41,14 +41,29 @@ class PaymentProfile {
         $this->isDefault = $status == true;
     }
 
-    public function cardType() {
+    public function firstName() {
+
+        return $this->firstName;
+    }
+
+    public function lastName() {
+
+        return $this->lastName;
+    }
+
+    public function type() {
 
         return $this->cardType;
     }
 
-    public function cardNumber() {
+    public function number() {
 
         return $this->cardNumber;
+    }
+
+    public function expiresOn() {
+
+        return $this->expirationDate;
     }
 
     public function phone() {

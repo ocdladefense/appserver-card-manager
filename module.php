@@ -19,7 +19,12 @@ class PaymentProfileManagerModule extends Module {
 
         $customerProfile = new CustomerProfile($profileId);
 
-        var_dump($customerProfile->getPaymentProfiles());exit;
+        $paymentProfiles = $customerProfile->getPaymentProfiles();
+
+        $tpl = new Template("cards");
+        $tpl->addPath(__DIR__ . "/templates");
+
+        return $tpl->render(["paymentProfiles" => $paymentProfiles]);
     }
 
     // Show a form for adding a new payment profile
