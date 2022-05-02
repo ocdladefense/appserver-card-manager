@@ -4,5 +4,7 @@
     "type": "wordpress-theme",
     "license": "MIT",
     "authors": [],
-    "require": {}
+    "require": {
+        "authorizenet/authorizenet": "1.9.2"
+    }
 }
