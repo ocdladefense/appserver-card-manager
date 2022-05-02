@@ -4,6 +4,7 @@ use PaymentProfile;
 use MerchantAuthentication;
 use net\authorize\api\contract\v1 as AnetAPI;
 use net\authorize\api\controller as AnetController;
+use net\authorize\api\constants\ANetEnvironment;
 
 
 class CustomerProfile {
@@ -16,7 +17,7 @@ class CustomerProfile {
 
     public function __construct($profileId = null) {
 
-        $this->endpoint = \net\authorize\api\constants\ANetEnvironment::SANDBOX;
+        $this->endpoint = ANetEnvironment::SANDBOX;
         $this->profileId = $profileId;
     }
 
