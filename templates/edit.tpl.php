@@ -131,7 +131,7 @@
 
 
                 <div class="mt-4 mb-4 d-flex justify-content-between">
-                    <button class="btn btn-success px-3" type="submit">Save Card</button>
+                    <button class="btn btn-success px-3" type="submit">Update Card</button>
                 </div>
 
             </div>
