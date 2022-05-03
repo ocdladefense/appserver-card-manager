@@ -12,6 +12,18 @@
         "cards/show":{
             "callback":"showAllPaymentProfiles",
             "content-type":"text/html"
+        },
+        "card/create":{
+            "callback":"create",
+            "content-type":"text/html"
+        },
+        "card/edit/%id":{
+            "callback":"edit",
+            "content-type":"text/html"
+        },
+        "card/delete/%id":{
+            "callback":"delete",
+            "content-type":"text/html"
         }
     }
 }

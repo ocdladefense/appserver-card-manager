@@ -7,6 +7,7 @@ class PaymentProfile {
     public $id;
     public $cardType;
     public $cardNumber;
+    public $lastFour;
     public $expirationDate;
     public $firstName;
     public $lastName;
@@ -46,6 +47,11 @@ class PaymentProfile {
         return $this->firstName;
     }
 
+    public function id() {
+
+        return $this->id;
+    }
+
     public function lastName() {
 
         return $this->lastName;
@@ -56,9 +62,9 @@ class PaymentProfile {
         return $this->cardType;
     }
 
-    public function number() {
+    public function lastFour() {
 
-        return $this->cardNumber;
+        return substr($this->cardNumber, -4);
     }
 
     public function expiresOn() {

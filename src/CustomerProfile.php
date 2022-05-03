@@ -61,7 +61,21 @@ class CustomerProfile {
 
     public function updatePaymentProfile($id) {}
 
-    public function deletePaymentProfile($id) {}
+    public function deletePaymentProfile($pProfileId) {
+
+        $request = new AnetAPI\DeleteCustomerPaymentProfileRequest();
+        $request->setMerchantAuthentication(MerchantAuthentication::getMerchantAuthentication());
+        $request->setCustomerProfileId($this->profileId);
+        $request->setCustomerPaymentProfileId($pProfileId);
+        $controller = new AnetController\DeleteCustomerPaymentProfileController($request);
+        $response = $controller->executeWithApiResponse($this->endpoint);
+
+        if($this->hasErrors($response)) {
+
+            $errorMessages = $response->getMessages()->getMessage();
+            Throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
+        }
+    }
 
 
     public function hasErrors($response) {

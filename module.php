@@ -28,11 +28,17 @@ class PaymentProfileManagerModule extends Module {
     }
 
     // Show a form for adding a new payment profile
-    public function create() {}
+    public function create() {
+
+        var_dump("Hello from create");exit;
+    }
 
 
     // Shows one profile in an editable form.
-    public function edit($id) {}
+    public function edit($id) {
+        
+        var_dump("Hello from edit");exit;
+    }
 
 
     // Save a new payment profile
@@ -57,6 +63,15 @@ class PaymentProfileManagerModule extends Module {
         return $this->showAllPaymentProfiles();
     }
 
-    // Delete a profile
-    public function delete($id) {}
+    // Delete a payment profile
+    public function delete($id) {
+
+        $profileId = "1915351471";  //Profile id for Jose on authorize.net
+
+        $customerProfile = new CustomerProfile($profileId);
+
+        $customerProfile->deletePaymentProfile($id);
+
+        return $this->showAllPaymentProfiles();
+    }
 }
