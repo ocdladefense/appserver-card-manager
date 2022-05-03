@@ -43,13 +43,6 @@
                         </div>
 
                         <div class="col-md-6">
-                            <div class="inputbox mt-3 mr-2 w-25">
-                                    <input type="text" name="cvv" class="form-control" maxlength="3" required="required" />
-                                <span>CVV</span>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
                             <div class="d-flex flex-row">
 
                             <div class="inputbox mt-3 mr-2 w-25">

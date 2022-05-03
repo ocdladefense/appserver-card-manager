@@ -57,7 +57,7 @@ class CustomerProfile {
     }
 
 
-    public function getPaymentProfile($profileId, $getAsObject = true) {
+    public function getPaymentProfile($profileId) {
 
         $request = new AnetAPI\GetCustomerPaymentProfileRequest();
         $request->setMerchantAuthentication(MerchantAuthentication::getMerchantAuthentication());
@@ -76,11 +76,11 @@ class CustomerProfile {
 
         $paymentProfile = $response->getPaymentProfile();
 
-        return $getAsObject ? PaymentProfile::fromMaskedArray($paymentProfile) : $paymentProfile;
+        return PaymentProfile::fromMaskedArray($paymentProfile);
     }
 
 
-    public function addPaymentProfile($profile){
+    public function savePaymentProfile($profile, $isUpdate){
 
         $isDefault = empty($profile->default) ? false : true;
 
@@ -88,7 +88,6 @@ class CustomerProfile {
         $creditCard = new AnetAPI\CreditCardType();
         $creditCard->setCardNumber($profile->cardNumber);
         $creditCard->setExpirationDate($profile->expYear . "-" . $profile->expMonth);
-        $creditCard->setCardCode($profile->cvv);
         $paymentCreditCard = new AnetAPI\PaymentType();
         $paymentCreditCard->setCreditCard($creditCard);
 
@@ -104,17 +103,19 @@ class CustomerProfile {
         $billto->setZip($profile->city);
         $billto->setCountry("USA");
         $billto->setPhoneNumber($profile->phone);
-        // $billto->setfaxNumber("999-999-9999");
 
         // Create a new Customer Payment Profile object
-        $paymentprofile = new AnetAPI\CustomerPaymentProfileType();
+        $paymentprofile = $isUpdate ? new AnetAPI\CustomerPaymentProfileExType() : new AnetAPI\CustomerPaymentProfileType();
+
+        if($isUpdate) $paymentprofile->setCustomerPaymentProfileId($profile->id);
+
         $paymentprofile->setCustomerType('individual');
         $paymentprofile->setBillTo($billto);
         $paymentprofile->setPayment($paymentCreditCard);
         $paymentprofile->setDefaultPaymentProfile($isDefault);
 
         // Assemble the complete transaction request
-        $paymentprofilerequest = new AnetAPI\CreateCustomerPaymentProfileRequest();
+        $paymentprofilerequest = $isUpdate ? new AnetAPI\UpdateCustomerPaymentProfileRequest() : new AnetAPI\CreateCustomerPaymentProfileRequest();
         $paymentprofilerequest->setMerchantAuthentication(MerchantAuthentication::getMerchantAuthentication());
 
         // Add an existing profile id to the request
@@ -123,51 +124,10 @@ class CustomerProfile {
         $paymentprofilerequest->setValidationMode("liveMode");
 
         // Create the controller and get the response
-        $controller = new AnetController\CreateCustomerPaymentProfileController($paymentprofilerequest);
+        $controller = $isUpdate ? new AnetController\UpdateCustomerPaymentProfileController($paymentprofilerequest)
+                    : new AnetController\CreateCustomerPaymentProfileController($paymentprofilerequest);
+
         $response = $controller->executeWithApiResponse($this->endpoint);
-
-        if($this->hasErrors($response)) {
-
-            $errorMessages = $response->getMessages()->getMessage();
-            Throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
-        }
-    }
-
-    public function updatePaymentProfile($profile) {
-
-        $isDefault = empty($profile->default) ? false : true;
-
-        $billto = new AnetAPI\CustomerAddressType();
-        $billto->setFirstName($profile->firstName);
-        $billto->setLastName($profile->lastName);
-        // $billto->setCompany("Souveniropolis");
-        $billto->setAddress($profile->address);
-        $billto->setCity($profile->city);
-        $billto->setState($profile->state);
-        $billto->setZip($profile->city);
-        $billto->setCountry("USA");
-        $billto->setPhoneNumber($profile->phone);
-        // $billto->setfaxNumber("999-999-9999");
-
-        $creditCard = new AnetAPI\CreditCardType();
-		$creditCard->setCardNumber($profile->cardNumber);
-		$creditCard->setExpirationDate($profile->expYear . "-" . $profile->expMonth);
-
-        $paymentCreditCard = new AnetAPI\PaymentType();
-		$paymentCreditCard->setCreditCard($creditCard);
-		$paymentprofile = new AnetAPI\CustomerPaymentProfileExType();
-		$paymentprofile->setBillTo($billto);
-		$paymentprofile->setCustomerPaymentProfileId($profile->id);
-		$paymentprofile->setPayment($paymentCreditCard);
-
-        // Submit a UpdatePaymentProfileRequest
-		$request = new AnetAPI\UpdateCustomerPaymentProfileRequest();
-		$request->setMerchantAuthentication(MerchantAuthentication::getMerchantAuthentication());
-		$request->setCustomerProfileId($this->profileId);
-		$request->setPaymentProfile($paymentprofile);
-
-		$controller = new AnetController\UpdateCustomerPaymentProfileController($request);
-		$response = $controller->executeWithApiResponse($this->endpoint);
 
         if($this->hasErrors($response)) {
 

@@ -55,15 +55,9 @@ class PaymentProfileManagerModule extends Module {
 
         $paymentProfile = $this->getRequest()->getBody();
 
-        if(empty($paymentProfile->id)) {
-            
-            $this->customerProfile->addPaymentProfile($paymentProfile);
+        $isUpdate = empty($paymentProfile->id) ? false : true;
 
-        } else {
-
-            $this->customerProfile->updatePaymentProfile($paymentProfile);
-
-        }
+        $this->customerProfile->savePaymentProfile($paymentProfile, $isUpdate);
 
         return redirect("/cards/show");
     }
