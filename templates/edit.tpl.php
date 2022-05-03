@@ -3,7 +3,7 @@
 
 <div class="container px-5">
 
-    <h2> Payment Method</h2>
+    <h2>Edit Payment Method</h2>
 
     <form method="post" action="/card/save" enctype="multipart/form-data">
 
@@ -37,7 +37,38 @@
                     <div class="row">
 
                         <div class="col-md-6">
+                            <div class="inputbox mt-3 mr-2 w-75">
+                                <input type="text" name="cardNumber" class="form-control" maxlength="16" minlength="16" placeholder="4242424242424242" required="required" />
+                                <i class="fa fa-credit-card"></i>
+                                <span>Card Number</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="inputbox mt-3 mr-2 w-25">
+                                    <input type="text" name="cvv" class="form-control" maxlength="3" required="required" />
+                                <span>CVV</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
                             <div class="d-flex flex-row">
+
+                            <div class="inputbox mt-3 mr-2 w-25">
+                                    <input type="text" name="expMonth" class="form-control" maxlength="2" minlength="2" placeholder="mm" required="required" />
+                                <span>exp. month</span>
+                            </div>
+
+                            &nbsp;
+                            &nbsp;
+
+                            <div class="inputbox mt-3 mr-2 w-25">
+                                    <input type="text" name="expYear" class="form-control" maxlength="4" minlength="4" placeholder="yyyy" required="required" />
+                                <span>exp. year</span>
+                            </div>
+
+                            &nbsp;
+                            &nbsp;
 
                             <div class="form-check mt-3 ml-2">
                                 <input class="form-check-input" type="checkbox" name="default" value="1" >
@@ -96,7 +127,7 @@
 
                         <div class="col-md-6">
                             <div class="inputbox mt-3 mr-2">
-                                <input type="tel" name="phone" class="form-control" value="<?php print $profile->phone(); ?>" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="555-555-5555" required />
+                                <input type="tel" name="phone" class="form-control" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" value="<?php print $profile->phone(); ?>" placeholder="555-555-5555" required />
                                 <span>Phone</span>
                             </div>
                         </div>

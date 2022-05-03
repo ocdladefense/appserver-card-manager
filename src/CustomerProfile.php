@@ -57,7 +57,7 @@ class CustomerProfile {
     }
 
 
-    public function getPaymentProfile($profileId) {
+    public function getPaymentProfile($profileId, $getAsObject = true) {
 
         $request = new AnetAPI\GetCustomerPaymentProfileRequest();
         $request->setMerchantAuthentication(MerchantAuthentication::getMerchantAuthentication());
@@ -76,7 +76,7 @@ class CustomerProfile {
 
         $paymentProfile = $response->getPaymentProfile();
 
-        return PaymentProfile::fromMaskedArray($paymentProfile);
+        return $getAsObject ? PaymentProfile::fromMaskedArray($paymentProfile) : $paymentProfile;
     }
 
 
@@ -133,9 +133,47 @@ class CustomerProfile {
         }
     }
 
-    public function updatePaymentProfile($id) {
+    public function updatePaymentProfile($profile) {
 
-        var_dump("update payment profile");exit;
+        $isDefault = empty($profile->default) ? false : true;
+
+        $billto = new AnetAPI\CustomerAddressType();
+        $billto->setFirstName($profile->firstName);
+        $billto->setLastName($profile->lastName);
+        // $billto->setCompany("Souveniropolis");
+        $billto->setAddress($profile->address);
+        $billto->setCity($profile->city);
+        $billto->setState($profile->state);
+        $billto->setZip($profile->city);
+        $billto->setCountry("USA");
+        $billto->setPhoneNumber($profile->phone);
+        // $billto->setfaxNumber("999-999-9999");
+
+        $creditCard = new AnetAPI\CreditCardType();
+		$creditCard->setCardNumber($profile->cardNumber);
+		$creditCard->setExpirationDate($profile->expYear . "-" . $profile->expMonth);
+
+        $paymentCreditCard = new AnetAPI\PaymentType();
+		$paymentCreditCard->setCreditCard($creditCard);
+		$paymentprofile = new AnetAPI\CustomerPaymentProfileExType();
+		$paymentprofile->setBillTo($billto);
+		$paymentprofile->setCustomerPaymentProfileId($profile->id);
+		$paymentprofile->setPayment($paymentCreditCard);
+
+        // Submit a UpdatePaymentProfileRequest
+		$request = new AnetAPI\UpdateCustomerPaymentProfileRequest();
+		$request->setMerchantAuthentication(MerchantAuthentication::getMerchantAuthentication());
+		$request->setCustomerProfileId($this->profileId);
+		$request->setPaymentProfile($paymentprofile);
+
+		$controller = new AnetController\UpdateCustomerPaymentProfileController($request);
+		$response = $controller->executeWithApiResponse($this->endpoint);
+
+        if($this->hasErrors($response)) {
+
+            $errorMessages = $response->getMessages()->getMessage();
+            Throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
+        }
     }
 
     public function deletePaymentProfile($pProfileId) {

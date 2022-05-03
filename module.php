@@ -65,7 +65,7 @@ class PaymentProfileManagerModule extends Module {
 
         }
 
-        return $this->showAll();
+        return redirect("/cards/show");
     }
 
     // Delete a payment profile
