@@ -10,7 +10,7 @@
     ],
 	"routes": {
         "cards/show":{
-            "callback":"showAllPaymentProfiles",
+            "callback":"showAll",
             "content-type":"text/html"
         },
         "card/create":{
@@ -19,6 +19,10 @@
         },
         "card/edit/%id":{
             "callback":"edit",
+            "content-type":"text/html"
+        },
+        "card/save":{
+            "callback":"save",
             "content-type":"text/html"
         },
         "card/delete/%id":{

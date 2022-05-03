@@ -25,7 +25,10 @@
         <div class="col-md-4 bg-light px-6 border border-primary profile">
 
             <div class="section mb-4">
-                <p><?php print $card->firstName() . " " . $card->lastName() . "'s " . $card->type(); ?></p>
+                <p>
+                    <?php print $card->firstName() . " " . $card->lastName() . "'s " . $card->type(); ?>
+                    <?php if($card->isDefault()) print "(default)"; ?> 
+                </p>
                 <p>Card ending in &bull;&bull;&bull;&bull; <?php print $card->lastFour(); ?></p>
                 <p>Expires on: <?php print $card->expiresOn(); ?></p>
             </div>

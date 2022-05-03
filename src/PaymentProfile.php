@@ -109,7 +109,7 @@ class PaymentProfile {
 
     public function isDefault() {
 
-        return $this->isDefault();
+        return $this->isDefault;
     }
 
 

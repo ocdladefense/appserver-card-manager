@@ -6,20 +6,21 @@ use CustomerProfile;
 
 class PaymentProfileManagerModule extends Module {
 
+    public $customerProfile;
+
     public function __construct() {
 
         parent::__construct();
+
+        $profileId = "1915351471";  //Profile id for Jose on authorize.net
+        $this->customerProfile = new CustomerProfile($profileId);
     }
 
     
     // I am just going to try to get all of the customer's payment profiles here.
-    public function showAllPaymentProfiles() {
+    public function showAll() {
 
-        $profileId = "1915351471";  //Profile id for Jose on authorize.net
-
-        $customerProfile = new CustomerProfile($profileId);
-
-        $paymentProfiles = $customerProfile->getPaymentProfiles();
+        $paymentProfiles = $this->customerProfile->getPaymentProfiles();
 
         $tpl = new Template("cards");
         $tpl->addPath(__DIR__ . "/templates");
@@ -30,7 +31,10 @@ class PaymentProfileManagerModule extends Module {
     // Show a form for adding a new payment profile
     public function create() {
 
-        var_dump("Hello from create");exit;
+        $tpl = new Template("create");
+        $tpl->addPath(__DIR__ . "/templates");
+
+        return $tpl->render();
     }
 
 
@@ -44,34 +48,26 @@ class PaymentProfileManagerModule extends Module {
     // Save a new payment profile
     public function save() {
 
-        $profileId = "1915351471";  //Profile id for Jose on authorize.net
-
-        $customerProfile = new CustomerProfile($profileId);
-
         $paymentProfile = $this->getRequest()->getBody();
 
         if(empty($paymentProfile->id)) {
             
-            $customerProfile->addNewPaymentProfile($paymentProfile);
+            $this->customerProfile->addPaymentProfile($paymentProfile);
 
         } else {
 
-            $customerProfile->updatePaymentProfile($paymentProfile);
+            $this->customerProfile->updatePaymentProfile($paymentProfile);
 
         }
 
-        return $this->showAllPaymentProfiles();
+        return $this->showAll();
     }
 
     // Delete a payment profile
     public function delete($id) {
 
-        $profileId = "1915351471";  //Profile id for Jose on authorize.net
+        $this->customerProfile->deletePaymentProfile($id);
 
-        $customerProfile = new CustomerProfile($profileId);
-
-        $customerProfile->deletePaymentProfile($id);
-
-        return $this->showAllPaymentProfiles();
+        return redirect("/cards/show");
     }
 }
