@@ -90,8 +90,6 @@ class CustomerProfile {
         $paymentprofile->setPayment($paymentCreditCard);
         $paymentprofile->setDefaultPaymentProfile($isDefault);
 
-        $paymentprofiles[] = $paymentprofile;
-
         // Assemble the complete transaction request
         $paymentprofilerequest = new AnetAPI\CreateCustomerPaymentProfileRequest();
         $paymentprofilerequest->setMerchantAuthentication(MerchantAuthentication::getMerchantAuthentication());
