@@ -40,8 +40,13 @@ class PaymentProfileManagerModule extends Module {
 
     // Shows one profile in an editable form.
     public function edit($id) {
+
+        $profile = $this->customerProfile->getPaymentProfile($id);
         
-        var_dump("Hello from edit");exit;
+        $tpl = new Template("edit");
+        $tpl->addPath(__DIR__ . "/templates");
+
+        return $tpl->render(["profile" => $profile]);
     }
 
 

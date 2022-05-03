@@ -57,6 +57,29 @@ class CustomerProfile {
     }
 
 
+    public function getPaymentProfile($profileId) {
+
+        $request = new AnetAPI\GetCustomerPaymentProfileRequest();
+        $request->setMerchantAuthentication(MerchantAuthentication::getMerchantAuthentication());
+        $request->setRefId( $refId);
+        $request->setCustomerProfileId($this->profileId);
+        $request->setCustomerPaymentProfileId($profileId);
+    
+        $controller = new AnetController\GetCustomerPaymentProfileController($request);
+        $response = $controller->executeWithApiResponse($this->endpoint);
+
+        if($this->hasErrors($response)) {
+
+            $errorMessages = $response->getMessages()->getMessage();
+            Throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
+        }
+
+        $paymentProfile = $response->getPaymentProfile();
+
+        return PaymentProfile::fromMaskedArray($paymentProfile);
+    }
+
+
     public function addPaymentProfile($profile){
 
         $isDefault = empty($profile->default) ? false : true;
