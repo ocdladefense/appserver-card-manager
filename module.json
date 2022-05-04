@@ -1,7 +1,7 @@
 {
-	"comment": "This is a module template",
-	"name": "Payment-profile-manager", 
-	"description": "A module for building other modules.",
+	"comment": "This is an authorize.net customer payment profile manager.",
+	"name": "payment-profile-manager", 
+	"description": "A module for allowing users to manage their saved payment profiles.",
     "connectedApp":"default",
 	"files": [
         "CustomerProfile.php",
