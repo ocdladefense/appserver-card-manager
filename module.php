@@ -53,11 +53,16 @@ class PaymentProfileManagerModule extends Module {
     // Save a new payment profile
     public function save() {
 
-        $paymentProfile = $this->getRequest()->getBody();
+        $profile = $this->getRequest()->getBody();
 
         $isUpdate = empty($paymentProfile->id) ? false : true;
 
-        $this->customerProfile->savePaymentProfile($paymentProfile, $isUpdate);
+        $result = $this->customerProfile->savePaymentProfile($profile, $isUpdate);
+
+        if($result !== true) {
+
+            return "<a href='javascript:history.back()'>&#8592;&nbsp;Go back&nbsp;&nbsp;</a>$result";
+        }
 
         return redirect("/cards/show");
     }

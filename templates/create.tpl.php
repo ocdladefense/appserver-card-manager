@@ -36,7 +36,7 @@
 
                         <div class="col-md-6">
                             <div class="inputbox mt-3 mr-2 w-75">
-                                <input type="text" name="cardNumber" class="form-control" maxlength="16" minlength="16" placeholder="4242424242424242" required="required" />
+                                <input type="text" name="cardNumber" class="form-control" maxlength="16" minlength="16" required />
                                 <i class="fa fa-credit-card"></i>
                                 <span>Card Number</span>
                             </div>
@@ -46,7 +46,7 @@
                             <div class="d-flex flex-row">
 
                             <div class="inputbox mt-3 mr-2 w-25">
-                                    <input type="text" name="expMonth" class="form-control" maxlength="2" minlength="2" placeholder="mm" required="required" />
+                                    <input type="text" name="expMonth" class="form-control" maxlength="2" minlength="2" placeholder="mm" required />
                                 <span>exp. month</span>
                             </div>
 
@@ -54,7 +54,7 @@
                             &nbsp;
 
                             <div class="inputbox mt-3 mr-2 w-25">
-                                    <input type="text" name="expYear" class="form-control" maxlength="4" minlength="4" placeholder="yyyy" required="required" />
+                                    <input type="text" name="expYear" class="form-control" maxlength="4" minlength="4" placeholder="yyyy" required />
                                 <span>exp. year</span>
                             </div>
 
@@ -82,14 +82,14 @@
 
                             <div class="col-md-6">
                                 <div class="inputbox mt-3 mr-2">
-                                    <input type="text" name="address" class="form-control" required="required" />
+                                    <input type="text" name="address" class="form-control" required />
                                     <span>Street Address</span>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
                                 <div class="inputbox mt-3 mr-2">
-                                    <input type="text" name="city" class="form-control" required="required" />
+                                    <input type="text" name="city" class="form-control" required />
                                     <span>City</span>
                                 </div>  
                             </div>
@@ -101,7 +101,7 @@
 
                             <div class="col-md-6">
                                 <div class="inputbox mt-3 mr-2">
-                                    <input type="text" name="state" class="form-control" required="required" />
+                                    <input type="text" name="state" class="form-control" required />
                                     <span>State/Province</span>
                                 </div>
                             </div>
@@ -109,7 +109,7 @@
 
                             <div class="col-md-6">
                                 <div class="inputbox mt-3 mr-2">
-                                    <input type="text" name="zip" class="form-control" required="required" />
+                                    <input type="text" name="zip" class="form-control" required />
                                     <span>Zip code</span>
                                 </div>
                             </div>
@@ -128,8 +128,13 @@
                 </div>
 
 
-                <div class="mt-4 mb-4 d-flex justify-content-between">
-                    <button class="btn btn-success px-3" type="submit">Save Card</button>
+                <div class="row">
+                    <div class="mt-4 mb-4">
+                        <button class="btn btn-success px-3 mx-4" type="submit">Save Card</button>
+                        <button class="btn btn-secondary px-3 mx-4" type="button" onClick="history.go(-1);">
+                            &nbsp;&nbsp;&nbsp;Cancel&nbsp;&nbsp;&nbsp;
+                        </button>
+                    </div>
                 </div>
 
             </div>

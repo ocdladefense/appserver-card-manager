@@ -26,7 +26,7 @@ class CustomerProfile {
     public function getProfile() {
 
         $request = new AnetAPI\GetCustomerProfileRequest();
-        $request->setMerchantAuthentication(MerchantAuthentication::getMerchantAuthentication());
+        $request->setMerchantAuthentication(MerchantAuthentication::get());
         $request->setCustomerProfileId($this->profileId);
         $controller = new AnetController\GetCustomerProfileController($request);
         $response = $controller->executeWithApiResponse($this->endpoint);
@@ -60,7 +60,7 @@ class CustomerProfile {
     public function getPaymentProfile($profileId) {
 
         $request = new AnetAPI\GetCustomerPaymentProfileRequest();
-        $request->setMerchantAuthentication(MerchantAuthentication::getMerchantAuthentication());
+        $request->setMerchantAuthentication(MerchantAuthentication::get());
         $request->setRefId( $refId);
         $request->setCustomerProfileId($this->profileId);
         $request->setCustomerPaymentProfileId($profileId);
@@ -116,7 +116,7 @@ class CustomerProfile {
 
         // Assemble the complete transaction request
         $paymentprofilerequest = $isUpdate ? new AnetAPI\UpdateCustomerPaymentProfileRequest() : new AnetAPI\CreateCustomerPaymentProfileRequest();
-        $paymentprofilerequest->setMerchantAuthentication(MerchantAuthentication::getMerchantAuthentication());
+        $paymentprofilerequest->setMerchantAuthentication(MerchantAuthentication::get());
 
         // Add an existing profile id to the request
         $paymentprofilerequest->setCustomerProfileId($this->profileId);
@@ -132,14 +132,17 @@ class CustomerProfile {
         if($this->hasErrors($response)) {
 
             $errorMessages = $response->getMessages()->getMessage();
-            Throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
+            //Throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
+            return $errorMessages[0]->getText();
         }
+
+        return true;
     }
 
     public function deletePaymentProfile($pProfileId) {
 
         $request = new AnetAPI\DeleteCustomerPaymentProfileRequest();
-        $request->setMerchantAuthentication(MerchantAuthentication::getMerchantAuthentication());
+        $request->setMerchantAuthentication(MerchantAuthentication::get());
         $request->setCustomerProfileId($this->profileId);
         $request->setCustomerPaymentProfileId($pProfileId);
         $controller = new AnetController\DeleteCustomerPaymentProfileController($request);

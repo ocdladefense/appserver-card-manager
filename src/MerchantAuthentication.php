@@ -13,7 +13,7 @@ class MerchantAuthentication {
         $this->transactionKey = "6FR49pDH5Jjum58g";
     }
 
-    public static function getMerchantAuthentication() {
+    public static function get() {
 
         $merchantAuth = new Self();
 
