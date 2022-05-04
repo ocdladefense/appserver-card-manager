@@ -41,7 +41,7 @@
                 <p><?php print $card->phone(); ?></p>
             </div>
 
-            <form class="btn-form delete-form" action="/card/delete/<?php print $card->id(); ?>">
+            <form class="btn-form" action="/card/delete/<?php print $card->id(); ?>" onSubmit="return confirm('Are you sure you want to delete this payment method?');">
                 <button class="btn btn-primary">Delete</button>
             </form>
 
