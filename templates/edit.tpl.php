@@ -68,8 +68,10 @@
                             &nbsp;
                             &nbsp;
 
+                            <?php $checked = $profile->isDefault() ? "checked" : ""; ?>
+
                             <div class="form-check mt-3 ml-2">
-                                <input class="form-check-input" type="checkbox" name="default" value="1" >
+                                <input class="form-check-input" type="checkbox" <?php print $checked; ?> name="default" value="1" >
                                 <span>Set as default</span>
                             </div>
 
