@@ -11,6 +11,12 @@
     <p class="h3">Your Saved Payment Methods &nbsp; <a class="text-decoration-none" href="/card/create">&#43;&nbsp;add card</a></p>
 </div>
 
+<?php if(count($paymentProfiles) == 0) : ?>
+    <div class="container text-center vw-100">
+        <p class="h3">You don't have any saved payment methods.</p>
+    </div>
+<?php endif; ?>
+
 <div class="container vw-100">
     <div class="row">
 
