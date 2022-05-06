@@ -11,23 +11,33 @@
 	"routes": {
         "cards/show":{
             "callback":"showAll",
-            "content-type":"text/html"
+            "content-type":"text/html",
+			"access":"is_authenticated",
+			"authorization":"webserver"
         },
         "card/create":{
             "callback":"create",
-            "content-type":"text/html"
+            "content-type":"text/html",
+			"access":"is_authenticated",
+			"authorization":"webserver"
         },
         "card/edit/%id":{
             "callback":"edit",
-            "content-type":"text/html"
+            "content-type":"text/html",
+			"access":"is_authenticated",
+			"authorization":"webserver"
         },
         "card/save":{
             "callback":"save",
-            "content-type":"text/html"
+            "content-type":"text/html",
+			"access":"is_authenticated",
+			"authorization":"webserver"
         },
         "card/delete/%id":{
             "callback":"delete",
-            "content-type":"text/html"
+            "content-type":"text/html",
+			"access":"is_authenticated",
+			"authorization":"webserver"
         }
     }
 }
