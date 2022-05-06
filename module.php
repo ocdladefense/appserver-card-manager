@@ -3,6 +3,7 @@
 require "vendor/autoload.php";
 
 use CustomerProfile;
+use function Mysql\select;
 
 class PaymentProfileManagerModule extends Module {
 
@@ -11,16 +12,15 @@ class PaymentProfileManagerModule extends Module {
     public function __construct() {
 
         parent::__construct();
-
-        $profileId = "1915351471";  //Profile id for Jose on authorize.net
-        $this->customerProfile = new CustomerProfile($profileId);
     }
 
     
     // I am just going to try to get all of the customer's payment profiles here.
     public function showAll() {
 
-        $paymentProfiles = $this->customerProfile->getPaymentProfiles();
+        $customerProfile = $this->getCustomerProfile();
+
+        $paymentProfiles = $customerProfile->getPaymentProfiles();
 
         $tpl = new Template("cards");
         $tpl->addPath(__DIR__ . "/templates");
@@ -41,7 +41,9 @@ class PaymentProfileManagerModule extends Module {
     // Shows one profile in an editable form.
     public function edit($id) {
 
-        $profile = $this->customerProfile->getPaymentProfile($id);
+        $customerProfile = $this->getCustomerProfile();
+
+        $profile = $customerProfile->getPaymentProfile($id);
         
         $tpl = new Template("edit");
         $tpl->addPath(__DIR__ . "/templates");
@@ -57,7 +59,9 @@ class PaymentProfileManagerModule extends Module {
 
         $isUpdate = empty($paymentProfile->id) ? false : true;
 
-        $result = $this->customerProfile->savePaymentProfile($profile, $isUpdate);
+        $customerProfile = $this->getCustomerProfile();
+
+        $result = $customerProfile->savePaymentProfile($profile, $isUpdate);
 
         if($result !== true) {
 
@@ -70,8 +74,28 @@ class PaymentProfileManagerModule extends Module {
     // Delete a payment profile
     public function delete($id) {
 
-        $this->customerProfile->deletePaymentProfile($id);
+        $customerProfile = $this->getCustomerProfile();
+
+        $customerProfile->deletePaymentProfile($id);
 
         return redirect("/cards/show");
+    }
+
+
+    public function getCustomerProfile() {
+
+        $user = current_user();
+
+        $api = $this->loadForceApi();
+
+        $query = "SELECT Contact.AuthorizeDotNetCustomerProfileId__c from User where Id = '" . $user->getId() . "'";
+
+        $result = $api->query($query)->getRecord();
+        
+        $profileId = $result["Contact"]["AuthorizeDotNetCustomerProfileId__c"];
+
+        //$profileId = "1915351471";  //Profile id for Jose on authorize.net
+
+        return new CustomerProfile($profileId);
     }
 }
