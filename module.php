@@ -2,12 +2,9 @@
 
 require "vendor/autoload.php";
 
-use CustomerProfile;
 use function Mysql\select;
 
 class PaymentProfileManagerModule extends Module {
-
-    public $customerProfile;
 
     public function __construct() {
 
@@ -93,6 +90,9 @@ class PaymentProfileManagerModule extends Module {
         $result = $api->query($query)->getRecord();
         
         $profileId = $result["Contact"]["AuthorizeDotNetCustomerProfileId__c"];
+
+        if(empty($profileId)) 
+        throw new PaymentProfileManagerException("There is no authorize.net customer profile associated with the current user.");
 
         //$profileId = "1915351471";  //Profile id for Jose on authorize.net
 

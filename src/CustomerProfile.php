@@ -162,6 +162,3 @@ class CustomerProfile {
     }
 }
 
-
-class PaymentProfileManagerException extends Exception{}
-

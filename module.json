@@ -6,7 +6,8 @@
 	"files": [
         "CustomerProfile.php",
         "PaymentProfile.php",
-        "MerchantAuthentication.php"
+        "MerchantAuthentication.php",
+        "PaymentProfileManagerException.php"
     ],
 	"routes": {
         "cards/show":{
