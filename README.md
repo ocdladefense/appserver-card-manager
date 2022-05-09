@@ -17,3 +17,8 @@ The payment profile manager exposes CRUD operations and related UX to manage cus
 - AUTHORIZE_DOT_NET_MERCHANT_ID (string)
 - AUTHORIZE_DOT_NET_TRANSACTION_KEY (string)
 - AUTHORIZE_DOT_NET_USE_PRODUCTION_ENDPOINT (boolean)
+
+## Authorize.net endpoints
+- SANDBOX - https://apitest.authorize.net
+- PRODUCTION - https://api2.authorize.net
+
