@@ -12,9 +12,7 @@
 	"routes": {
         "cards/show":{
             "callback":"showAll",
-            "content-type":"text/html",
-			"access":"is_authenticated",
-			"authorization":"webserver"
+            "content-type":"text/html"
         },
         "card/create":{
             "callback":"create",

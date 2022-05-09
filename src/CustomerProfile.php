@@ -80,9 +80,10 @@ class CustomerProfile {
     }
 
 
-    public function savePaymentProfile($profile, $isUpdate){
+    public function savePaymentProfile($profile){
 
         $isDefault = empty($profile->default) ? false : true;
+        $isUpdate = empty($profile->id) ? false : true;
 
         // Set credit card information for payment profile
         $creditCard = new AnetAPI\CreditCardType();
@@ -133,7 +134,6 @@ class CustomerProfile {
         if($this->hasErrors($response)) {
 
             $errorMessages = $response->getMessages()->getMessage();
-            //\throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
             return $errorMessages[0]->getText();
         }
 

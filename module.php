@@ -18,6 +18,8 @@ class PaymentProfileManagerModule extends Module {
 
         $customerProfile = $this->getCustomerProfile();
 
+        if(empty($customerProfile)) return $this->showMessage("No authorize.net customer profile associated with the current user.");
+
         $paymentProfiles = $customerProfile->getPaymentProfiles();
 
         $tpl = new Template("cards");
@@ -55,16 +57,11 @@ class PaymentProfileManagerModule extends Module {
 
         $profile = $this->getRequest()->getBody();
 
-        $isUpdate = empty($paymentProfile->id) ? false : true;
-
         $customerProfile = $this->getCustomerProfile();
 
-        $result = $customerProfile->savePaymentProfile($profile, $isUpdate);
+        $result = $customerProfile->savePaymentProfile($profile);
 
-        if($result !== true) {
-
-            return "<a href='javascript:history.back()'>&#8592;&nbsp;Go back&nbsp;&nbsp;</a>$result";
-        }
+        if($result !== true) return $this->showMessage($result);
 
         return redirect("/cards/show");
     }
@@ -92,11 +89,18 @@ class PaymentProfileManagerModule extends Module {
         
         $profileId = $result["Contact"]["AuthorizeDotNetCustomerProfileId__c"];
 
-        if(empty($profileId)) 
-        throw new PaymentProfileManagerException("There is no authorize.net customer profile associated with the current user.");
-
         //$profileId = "1915351471";  //Profile id for Jose on authorize.net
 
-        return new CustomerProfile($profileId);
+        return empty($profileId) ? null : new CustomerProfile($profileId);
+    }
+
+
+    // Return a user friendly error message.
+    public function showMessage($message) {
+
+        $tpl = new Template("message");
+        $tpl->addPath(__DIR__ . "/templates");
+
+        return $tpl->render(["message" => $message]);
     }
 }
