@@ -1,8 +1,5 @@
 <?php
 
-// Will have to remove this when the module is being required by the root composer.json.
-require "vendor/autoload.php";
-
 use function Mysql\select;
 
 class PaymentProfileManagerModule extends Module {
