@@ -1,15 +1,19 @@
-# Card Manager
-Manage customers' cards on file.
+# Payment Profile Manager
+Manage customers' saved payment profiles(cards) on file.
 
 ## Description
-The card manager exposes CRUD operations and related UX to manage customers' cards on file.
+The payment profile manager exposes CRUD operations and related UX to manage customers' saved payment methods on file.
 
-## Existing functionality
-See the `src/` directory for existing functionality.
 
 ## Routes
-These routes need to be created together with their callback functions.
-- `customer/%profileId` - `GET` - retrieve the customer's Authorize.net Profile, including a list of their cards on file.
-- `customer/%profileId/card/%paymentProfileId` - `DELETE`
-- `customer/%profileId/card/%paymentProfileId` - `POST`
-- `customer/%profileId/card/new` - `POST`
+- `cards/show` - `GET` - Show all of the saved payment profiles for the current user.
+- `card/create` - `GET` - Display a form so that the current user can create a new payment profile.
+- `card/edit/%id` - `GET` - Display a form so that the current user can edit an existing payment profile.
+- `card/save` - `POST` - Save a new payment profile, or changes made to an existing payment profile.
+- `card/delete/%id` - `DELETE` - Delete a payment profile.
+
+
+## Required Constants/Settings
+- AUTHORIZE_DOT_NET_MERCHANT_ID (string)
+- AUTHORIZE_DOT_NET_TRANSACTION_KEY (string)
+- AUTHORIZE_DOT_NET_USE_PRODUCTION_ENDPOINT (boolean)

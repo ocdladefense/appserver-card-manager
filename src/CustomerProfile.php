@@ -17,7 +17,7 @@ class CustomerProfile {
 
     public function __construct($profileId) {
 
-        $this->endpoint = ANetEnvironment::SANDBOX;
+        $this->endpoint = AUTHORIZE_DOT_NET_USE_PRODUCTION_ENDPOINT ? ANetEnvironment::PRODUCTION : ANetEnvironment::SANDBOX;
         $this->profileId = $profileId;
     }
 
@@ -34,7 +34,7 @@ class CustomerProfile {
         if($this->hasErrors($response)) {
 
             $errorMessages = $response->getMessages()->getMessage();
-            Throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
+            throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
         }
 
         return $response->getProfile();
@@ -71,7 +71,7 @@ class CustomerProfile {
         if($this->hasErrors($response)) {
 
             $errorMessages = $response->getMessages()->getMessage();
-            Throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
+            throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
         }
 
         $paymentProfile = $response->getPaymentProfile();
@@ -129,10 +129,11 @@ class CustomerProfile {
 
         $response = $controller->executeWithApiResponse($this->endpoint);
 
+        // These errors will probably be related to user input, so I am trying to return user friendly error messages.
         if($this->hasErrors($response)) {
 
             $errorMessages = $response->getMessages()->getMessage();
-            //Throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
+            //\throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
             return $errorMessages[0]->getText();
         }
 
@@ -151,7 +152,7 @@ class CustomerProfile {
         if($this->hasErrors($response)) {
 
             $errorMessages = $response->getMessages()->getMessage();
-            Throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
+            throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
         }
     }
 
