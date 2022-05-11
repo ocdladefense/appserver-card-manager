@@ -16,7 +16,7 @@
         "adminLink": false
     }],
 	"routes": {
-        "customer/save":{
+        "customer/%contactId/save":{
             "callback":"saveCustomer",
             "content-type":"text/html"
         },
