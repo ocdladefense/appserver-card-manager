@@ -23,9 +23,11 @@ The payment profile manager exposes CRUD operations and related UX to manage cus
 - PRODUCTION - https://api2.authorize.net
 
 
-## Testing Scripts
+## Testing Script
+### Testing updating a customer's Profile ID.
 - Editing a field on salesforce - 
-1. Make sure you are logged in to the app.  (username = "jbernal@ocdla.com.ocdpartial")
-2. Set the values you want to change on the contact object on the block of code between lines 114 and 124 in module.php, and run the cards/show route.
+1. Don't login to the app.
+2. Run the <code>customer/003j000000rU9NvAAK/save</code> route.
 3. In Salesforce Developer Console run this query:
-- SELECT Id, Firstname, LastName, Ocdla_Member_Status__c, AuthorizeDotNetCustomerProfileId__c FROM Contact where Id = '003j000000rU9NvAAK'
+        
+        SELECT Id, Firstname, LastName, Ocdla_Member_Status__c, AuthorizeDotNetCustomerProfileId__c FROM Contact where Id = '003j000000rU9NvAAK'
