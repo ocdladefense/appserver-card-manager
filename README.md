@@ -22,3 +22,10 @@ The payment profile manager exposes CRUD operations and related UX to manage cus
 - SANDBOX - https://apitest.authorize.net
 - PRODUCTION - https://api2.authorize.net
 
+
+## Testing Scripts
+- Editing a field on salesforce - 
+1. Make sure you are logged in to the app.  (username = "jbernal@ocdla.com.ocdpartial")
+2. Set the values you want to change on the contact object on the block of code between lines 114 and 124 in module.php, and run the cards/show route.
+3. In Salesforce Developer Console run this query:
+- SELECT Id, Firstname, LastName, Ocdla_Member_Status__c, AuthorizeDotNetCustomerProfileId__c FROM Contact where Id = '003j000000rU9NvAAK'
