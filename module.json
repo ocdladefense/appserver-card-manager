@@ -9,10 +9,26 @@
         "MerchantAuthentication.php",
         "PaymentProfileManagerException.php"
     ],
+    "links":[{
+        "href":"/cards/show",
+        "label": "Payment Methods",
+        "isSublink": false,
+        "adminLink": false
+    }],
 	"routes": {
+        "customer/save":{
+            "callback":"saveCustomer",
+            "content-type":"text/html"
+        },
+        "customer/create":{
+            "callback":"saveCustomer",
+            "content-type":"text/html"
+        },
         "cards/show":{
             "callback":"showAll",
-            "content-type":"text/html"
+            "content-type":"text/html",
+			"access":"is_authenticated",
+			"authorization":"webserver"
         },
         "card/create":{
             "callback":"create",

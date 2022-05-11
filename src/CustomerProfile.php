@@ -15,12 +15,37 @@ class CustomerProfile {
     public $profileId;
     
 
-    public function __construct($profileId) {
+    public function __construct($profileId = null) {
 
         $this->endpoint = AUTHORIZE_DOT_NET_USE_PRODUCTION_ENDPOINT ? ANetEnvironment::PRODUCTION : ANetEnvironment::SANDBOX;
         $this->profileId = $profileId;
     }
 
+    // Create a new customer profile
+    public static function create($params) {
+
+        $cp = new self();
+
+        $customerProfile = new AnetAPI\CustomerProfileType();
+        $customerProfile->setDescription($params["description"]);
+        $customerProfile->setMerchantCustomerId($params["customerId"]);
+        $customerProfile->setEmail($params["email"]);
+
+        $request = new AnetAPI\CreateCustomerProfileRequest();
+        $request->setMerchantAuthentication(MerchantAuthentication::get());
+        $request->setProfile($customerProfile);
+
+        $controller = new AnetController\CreateCustomerProfileController($request);
+        $response = $controller->executeWithApiResponse($cp->endpoint);
+
+        if($cp->hasErrors($response)) {
+
+            $errorMessages = $response->getMessages()->getMessage();
+            throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
+        }
+
+        return $response;
+    }
 
     // Get customer profile
     public function getProfile() {

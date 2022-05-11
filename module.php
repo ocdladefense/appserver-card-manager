@@ -15,7 +15,12 @@ class PaymentProfileManagerModule extends Module {
 
         $customerProfile = $this->getCustomerProfile();
 
-        if(empty($customerProfile)) return $this->showMessage("No authorize.net customer profile associated with the current user.");
+        if(empty($customerProfile)) {
+
+            $message = "No authorize.net customer profile associated with the current user.";
+
+            return $this->showMessage($message);
+        }
 
         $paymentProfiles = $customerProfile->getPaymentProfiles();
 
@@ -80,15 +85,68 @@ class PaymentProfileManagerModule extends Module {
 
         $api = $this->loadForceApi();
 
-        $query = "SELECT Contact.AuthorizeDotNetCustomerProfileId__c from User where Id = '" . $user->getId() . "'";
+        $query = "SELECT ContactId, Contact.AuthorizeDotNetCustomerProfileId__c FROM User WHERE Id = '" . $user->getId() . "'";
 
         $result = $api->query($query)->getRecord();
         
         $profileId = $result["Contact"]["AuthorizeDotNetCustomerProfileId__c"];
+        $contactId = $result["ContactId"];
 
-        //$profileId = "1915351471";  //Profile id for Jose on authorize.net
+        $autoEnroll = true;
+
+        if(empty($profileId) && $autoEnroll) {
+
+            $profileId = $this->saveCustomer($contactId);
+        }
 
         return empty($profileId) ? null : new CustomerProfile($profileId);
+    }
+
+
+    public function saveCustomer($contactId) {
+
+        $isAccountAuthorized = false; // Set to true if contact should be allowed to make purchases with the accounts cards on file. (Future Use)
+
+        $query = "SELECT Id, AccountId, Account.Name, FirstName, LastName, Email, AuthorizeDotNetCustomerProfileId__c FROM Contact WHERE Id = '$contactId'";
+
+        $api = $this->loadForceApi();
+
+        // Testing Area
+        $contact = new stdClass();
+        $contact->Id = $contactId;
+        $contact->Ocdla_Member_Status__c = "H";
+        $contact->AuthorizeDotNetCustomerProfileId__c = "0000000000000";
+
+        $resp = $api->upsert("Contact", $contact);
+
+        var_dump($resp);exit;
+
+        // End Testing Area
+
+        $contact = $api->query($query)->getRecord();
+
+        $firstName = $contact["FirstName"];
+        $lastName = $contact["LastName"];
+        $accountName = "$firstName $lastName";
+        $contactId = $contact["Id"];
+        $email = $contact["Email"];
+
+        $params = [
+            "description" => $accountName,
+            "customerId"  => $contactId,
+            "email"       => $email . "1"
+        ];
+
+        $response = CustomerProfile::create($params);
+        $profileId = $response->getCustomerProfileId();
+
+        $contact = new stdClass();
+        $contact->Id = $contactId;
+        $contact->AuthorizeDotNetCustomerProfileId__c = $profileId;
+
+        $resp = $api->upsert("Contact", $contact);
+
+        var_dump($resp);exit;
     }
 
 
