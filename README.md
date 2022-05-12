@@ -6,6 +6,7 @@ The payment profile manager exposes CRUD operations and related UX to manage cus
 
 
 ## Routes
+- `customer/%contactId/save` - `GET` - Save the Contact's customer Profile ID to Salesforce.
 - `cards/show` - `GET` - Show all of the saved payment profiles for the current user.
 - `card/create` - `GET` - Display a form so that the current user can create a new payment profile.
 - `card/edit/%id` - `GET` - Display a form so that the current user can edit an existing payment profile.
