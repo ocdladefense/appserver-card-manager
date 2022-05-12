@@ -20,12 +20,14 @@
             "callback":"saveCustomer",
             "content-type":"text/html"
         },
-        "customer/create":{
-            "callback":"saveCustomer",
-            "content-type":"text/html"
+        "customer/enroll":{
+            "callback":"enroll",
+            "content-type":"text/html",
+			"access":"is_authenticated",
+			"authorization":"webserver"
         },
-        "cards/show":{
-            "callback":"showAll",
+        "cards":{
+            "callback":"index",
             "content-type":"text/html",
 			"access":"is_authenticated",
 			"authorization":"webserver"
