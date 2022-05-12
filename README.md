@@ -8,7 +8,7 @@ The payment profile manager exposes CRUD operations and related UX to manage cus
 ## Routes
 - `customer/%contactId/save` - `GET` - Create the authorze.net customer profile and save the Contact's customer Profile ID to Salesforce.
 - `customer/enroll` - `GET` - Initiate the authorize.net customer profile creation process.
-- `cards/show` - `GET` - Show all of the saved payment profiles for the current user.
+- `cards` - `GET` - Show all of the saved payment profiles for the current user.
 - `card/create` - `GET` - Display a form so that the current user can create a new payment profile.
 - `card/edit/%id` - `GET` - Display a form so that the current user can edit an existing payment profile.
 - `card/save` - `POST` - Save a new payment profile, or changes made to an existing payment profile.
