@@ -114,7 +114,7 @@ class PaymentProfileManagerModule extends Module {
 
     public function saveCustomer($contactId) {
 
-        $isAccountAuthorized = false; // Set to true if contact should be allowed to make purchases with the accounts cards on file. (Future Use)
+        $isAccountAuthorized = false; //Should the contact be allowed to make purchases with the accounts cards on file? (Future Use)
 
         $query = "SELECT Id, AccountId, Account.Name, FirstName, LastName, Email, AuthorizeDotNetCustomerProfileId__c FROM Contact WHERE Id = '$contactId'";
 
