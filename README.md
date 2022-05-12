@@ -32,4 +32,4 @@ The payment profile manager exposes CRUD operations and related UX to manage cus
 4. Validate that the UPDATE was successful:
     - In the Salesforce Developer Console run this query:
         
-            SELECT Id, Firstname, LastName, Ocdla_Member_Status__c, AuthorizeDotNetCustomerProfileId__c FROM Contact where Id = '003j000000rU9NvAAK'
+            SELECT Id, Firstname, LastName, Ocdla_Member_Status__c, AuthorizeDotNetCustomerProfileId__c FROM Contact WHERE Id = '003j000000rU9NvAAK'
