@@ -10,7 +10,7 @@
         "PaymentProfileManagerException.php"
     ],
     "links":[{
-        "href":"/cards/show",
+        "href":"/cards",
         "label": "Payment Methods",
         "isSublink": false,
         "adminLink": false
