@@ -161,7 +161,7 @@ class CustomerProfile {
             return $errorMessages[0]->getText();
         }
 
-        return true;
+        return $response;
     }
 
     public function deletePaymentProfile($pProfileId) {
@@ -184,6 +184,12 @@ class CustomerProfile {
     public function hasErrors($response) {
 
         return $response->getMessages()->getResultCode() != self::RESPONSE_OK;
+    }
+
+
+    public function success() {
+
+        return $this->hasErrors == false;
     }
 }
 

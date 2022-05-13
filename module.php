@@ -72,7 +72,15 @@ class PaymentProfileManagerModule extends Module {
 
         if($result !== true) return $this->showMessage($result);
 
+        $sfResult = $this->sfSave($profile, $result);
+
         return redirect("/cards");
+    }
+
+
+    public function sfSave($profile, $result) {
+
+        var_dump($profile, $result);exit;
     }
 
     // Delete a payment profile
