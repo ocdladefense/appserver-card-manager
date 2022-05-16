@@ -34,7 +34,7 @@ class PaymentProfileManagerModule extends Module {
                 foreach($sfPaymentProfiles as $sfpp){
                     if($pp->Id() == $sfpp["ExternalId__c"]){
                         $pp->setExpirationDate($sfpp["ExpirationDate__c"]);
-                        continue;
+                        break;
                     }
                 }
             }
