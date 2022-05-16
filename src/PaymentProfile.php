@@ -9,6 +9,7 @@ class PaymentProfile {
     public $cardNumber;
     public $lastFour;
     public $expirationDate;
+    public $unmaskedExpirationDate;
     public $firstName;
     public $lastName;
     public $phone;
@@ -128,4 +129,9 @@ class PaymentProfile {
         $this->zip = $billTo->getZip();
         $this->country = $billTo->getCountry();
 	}
+
+    public function setExpirationDate($date) {
+
+        $this->expirationDate = $date;
+    }
 }

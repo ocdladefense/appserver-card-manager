@@ -12,6 +12,8 @@ class CustomerProfile {
 
     public $endpoint;
     public $profileId;
+    public $response;
+    public $success;
     
 
     public function __construct($profileId = null) {
@@ -152,16 +154,9 @@ class CustomerProfile {
         $controller = $isUpdate ? new AnetController\UpdateCustomerPaymentProfileController($paymentprofilerequest)
                     : new AnetController\CreateCustomerPaymentProfileController($paymentprofilerequest);
 
-        $response = $controller->executeWithApiResponse($this->endpoint);
+        $this->response = $controller->executeWithApiResponse($this->endpoint);
 
-        // These errors will probably be related to user input, so I am trying to return user friendly error messages.
-        if($this->hasErrors($response)) {
-
-            $errorMessages = $response->getMessages()->getMessage();
-            return $errorMessages[0]->getText();
-        }
-
-        return $response;
+        return $isUpdate ? $profile->id : $this->response->getCustomerPaymentProfileId();
     }
 
     public function deletePaymentProfile($pProfileId) {
@@ -181,15 +176,36 @@ class CustomerProfile {
     }
 
 
+    // Theses errors are probably due to programming errors, so Im just gonna throw the exception in the calling code.
     public function hasErrors($response) {
 
         return $response->getMessages()->getResultCode() != self::RESPONSE_OK;
     }
 
 
+    public function getResponse() {
+
+        return $this->response;
+    }
+
+
+    public function getCustomerId() {
+
+        return $this->getProfile()->getMerchantCustomerId();
+    }
+
+
+    // Some errors should be handled in a user-friendly way...hence the next two methods.
+    //(Feels like im on the verge of refactoring the way I work with the response)
+    public function getErrorMessage() {
+
+        return $this->response->getMessages()->getMessage()[0]->getText();
+    }
+
+
     public function success() {
 
-        return $this->hasErrors == false;
+        return $this->response->getMessages()->getResultCode() == self::RESPONSE_OK;
     }
 }
 
