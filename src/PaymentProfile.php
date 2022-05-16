@@ -70,7 +70,7 @@ class PaymentProfile {
 
     public function expiresOn() {
 
-        return $this->expirationDate;
+        return substr($this->expirationDate, 0, -3);
     }
 
     public function phone() {
