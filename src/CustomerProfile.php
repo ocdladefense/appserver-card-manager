@@ -127,7 +127,7 @@ class CustomerProfile {
         $billto->setAddress($profile->address);
         $billto->setCity($profile->city);
         $billto->setState($profile->state);
-        $billto->setZip($profile->city);
+        $billto->setZip($profile->zip);
         $billto->setCountry("USA");
         $billto->setPhoneNumber($profile->phone);
 
