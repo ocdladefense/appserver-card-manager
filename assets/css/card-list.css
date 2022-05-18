@@ -7,3 +7,12 @@ p{
 .btn-form{
     display: inline;
 }
+.card{
+    width:27rem;
+}
+
+@media screen and (max-width:750px) {
+    .vw-100{
+        width:unset !important;
+    }
+}
