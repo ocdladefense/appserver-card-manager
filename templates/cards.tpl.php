@@ -21,7 +21,9 @@
 
         <?php foreach($paymentProfiles as $card): ?>
 
-            <div class="card m-1">
+            <?php $default = $card->isDefault() ? "default" : ""; ?>
+
+            <div class="card m-1 <?php print $default; ?>">
                 <div class="card-body">
                     
                     <p class="card-title">
