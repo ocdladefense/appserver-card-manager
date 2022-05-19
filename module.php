@@ -26,7 +26,18 @@ class PaymentProfileManagerModule extends Module {
 
         } else {
 
+            $api = $this->loadForceApiFromFlow("usernamepassword");
+            $sfPaymentProfiles = PaymentProfile__c::all($api, $customerProfile->getCustomerId());
             $paymentProfiles = $customerProfile->getPaymentProfiles();
+
+            foreach($paymentProfiles as $pp){
+                foreach($sfPaymentProfiles as $sfpp){
+                    if($pp->Id() == $sfpp["ExternalId__c"]){
+                        $pp->setExpirationDate($sfpp["ExpirationDate__c"]);
+                        break;
+                    }
+                }
+            }
 
             $tpl = new Template("cards");
             $tpl->addPath(__DIR__ . "/templates");
@@ -61,19 +72,27 @@ class PaymentProfileManagerModule extends Module {
     }
 
 
-    // Save a new payment profile
+    // Save or update a customer payment profile
     public function save() {
 
-        $profile = $this->getRequest()->getBody();
+        $pProfile = $this->getRequest()->getBody();
 
-        $customerProfile = $this->getCustomerProfile();
+        $cp = $this->getCustomerProfile();
 
-        $result = $customerProfile->savePaymentProfile($profile);
+        $pProfileId = $cp->savePaymentProfile($pProfile);
 
-        if($result !== true) return $this->showMessage($result);
+        if(!$cp->success()) return $this->showMessage($cp->getErrorMessage());
+
+        $contactId = $cp->getCustomerId();
+        $api = $this->loadForceApiFromFlow("usernamepassword");
+        $paymentProfile__c = new PaymentProfile__c($api);
+        $resp = $paymentProfile__c->save($contactId, $pProfileId, $pProfile);
+
+        if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
 
         return redirect("/cards");
     }
+
 
     // Delete a payment profile
     public function delete($id) {
@@ -81,6 +100,11 @@ class PaymentProfileManagerModule extends Module {
         $customerProfile = $this->getCustomerProfile();
 
         $customerProfile->deletePaymentProfile($id);
+
+        $api = $this->loadForceApiFromFlow("usernamepassword");
+        $resp = PaymentProfile__c::delete($api, $id);
+
+        if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
 
         return redirect("/cards");
     }

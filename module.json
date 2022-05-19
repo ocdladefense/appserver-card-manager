@@ -6,6 +6,7 @@
 	"files": [
         "CustomerProfile.php",
         "PaymentProfile.php",
+        "PaymentProfile__c.php",
         "MerchantAuthentication.php",
         "PaymentProfileManagerException.php"
     ],
@@ -55,6 +56,10 @@
             "content-type":"text/html",
 			"access":"is_authenticated",
 			"authorization":"webserver"
+        },
+        "cards/test":{
+            "callback":"test",
+            "content-type":"text/html"
         }
     }
 }
