@@ -10,6 +10,9 @@ class PaymentProfileManagerModule extends Module {
     }
 
     /**
+     * 
+     */
+    /**
      * Test function from our meeting.
      */
         public function updatePaymentProfile($profileId = "904941070") {
@@ -21,12 +24,12 @@ class PaymentProfileManagerModule extends Module {
     
             $get = new AnetAPI\GetCustomerPaymentProfileRequest();
             $get->setMerchantAuthentication(MerchantAuthentication::get());
-            $get->setRefId( $refId);
+            $get->setRefId($refId);
             $get->setCustomerProfileId($customerId);
             $get->setCustomerPaymentProfileId($profileId);
             
-            $controller = new AnetController\GetCustomerPaymentProfileController($get);
-            $resp = $controller->executeWithApiResponse( \net\authorize\api\constants\ANetEnvironment::SANDBOX);
+            $client = new AnetController\GetCustomerPaymentProfileController($get);
+            $resp = $client->executeWithApiResponse( \net\authorize\api\constants\ANetEnvironment::SANDBOX);
     
     
             $existing = $resp->getPaymentProfile();
