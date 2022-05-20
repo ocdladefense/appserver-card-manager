@@ -17,18 +17,18 @@
         "adminLink": false
     }],
 	"routes": {
+        "cards":{
+            "callback":"index",
+            "content-type":"text/html",
+			"access":"is_authenticated",
+			"authorization":"webserver"
+        },
         "customer/%contactId/save":{
             "callback":"saveCustomer",
             "content-type":"text/html"
         },
         "customer/enroll":{
             "callback":"enroll",
-            "content-type":"text/html",
-			"access":"is_authenticated",
-			"authorization":"webserver"
-        },
-        "cards":{
-            "callback":"index",
             "content-type":"text/html",
 			"access":"is_authenticated",
 			"authorization":"webserver"
@@ -58,7 +58,7 @@
 			"authorization":"webserver"
         },
         "cards/test":{
-            "callback":"test",
+            "callback":"updatePaymentProfile",
             "content-type":"text/html"
         }
     }

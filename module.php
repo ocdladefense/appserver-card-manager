@@ -9,6 +9,72 @@ class PaymentProfileManagerModule extends Module {
         parent::__construct();
     }
 
+    /**
+     * Test function from our meeting.
+     */
+        public function updatePaymentProfile($profileId = "904941070") {
+
+            $customerId = "905125806";
+    
+            // Set the transaction's refId
+            $refId = 'ref' . time();
+    
+            $get = new AnetAPI\GetCustomerPaymentProfileRequest();
+            $get->setMerchantAuthentication(MerchantAuthentication::get());
+            $get->setRefId( $refId);
+            $get->setCustomerProfileId($customerId);
+            $get->setCustomerPaymentProfileId($profileId);
+            
+            $controller = new AnetController\GetCustomerPaymentProfileController($get);
+            $resp = $controller->executeWithApiResponse( \net\authorize\api\constants\ANetEnvironment::SANDBOX);
+    
+    
+            $existing = $resp->getPaymentProfile();
+            $payment = $existing->getPayment();
+            $card = $payment->getCreditCard();
+            $cardno = $card->getCardNumber();
+            $cardexp = $card->getExpirationDate();
+    
+            // var_dump($card,$cardno,$cardexp);exit;
+            $existingBillTo = $existing->getbillTo();
+    
+    
+            $creditCard = new AnetAPI\CreditCardType();
+            $creditCard->setCardNumber($card->getCardNumber());//"4111111111111111" );
+            $creditCard->setExpirationDate("2023-01");//"2038-12");
+            
+            $paymentCreditCard = new AnetAPI\PaymentType();
+            $paymentCreditCard->setCreditCard($creditCard);
+    
+            $profile = new AnetAPI\CustomerPaymentProfileExType();
+            // $profile->setBillTo($existingBillTo);
+            $profile->setCustomerPaymentProfileId($profileId);
+            $profile->setPayment($paymentCreditCard);
+            
+    
+    
+            // Assemble the complete transaction request
+            $req = new AnetAPI\UpdateCustomerPaymentProfileRequest();
+            $req->setMerchantAuthentication(MerchantAuthentication::get());
+    
+            // Add an existing profile id to the request
+            $req->setCustomerProfileId($customerId);
+            // $req->setPaymentProfile($profile);
+            $req->setPaymentProfile($profile); // Will this work?
+            // $req->setValidationMode("liveMode");
+    
+    
+    
+            // Create the controller and get the response
+            $controller = new AnetController\UpdateCustomerPaymentProfileController($req);
+    
+            $resp = $controller->executeWithApiResponse( \net\authorize\api\constants\ANetEnvironment::SANDBOX);
+    
+            var_dump($resp);
+    
+            exit;
+        
+    }
     
     // I am just going to try to get all of the customer's payment profiles here.
     public function index() {
