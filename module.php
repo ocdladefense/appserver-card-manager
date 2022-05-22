@@ -6,6 +6,11 @@ use function Mysql\select;
 
 class PaymentProfileManagerModule extends Module {
 
+
+
+    const SHOW_EXPIRATION_DATES = false;
+    
+
     public function __construct() {
 
         parent::__construct();
@@ -28,6 +33,7 @@ class PaymentProfileManagerModule extends Module {
         $profileId = $result["Contact"]["AuthorizeDotNetCustomerProfileId__c"];
 
 
+
         if(empty($profileId)) {
 
             $message = "Your don't have an Authorize.net customer profile.  Click <a href='/customer/enroll'>here</a> to auto-enroll.";
@@ -39,18 +45,24 @@ class PaymentProfileManagerModule extends Module {
 
 
         $req = new AuthNetRequest($profileId);
+        
         // $endpoint = "GetCustomerPaymentProfiles";
         // $client = new AuthNetClient($endpoint);
         // $resp = $client->send($req);// , $endpoint);
 
-        $resp = $req->getPaymentProfiles();
-        
-        $payments = $resp->getPaymentProfiles();
-        
-        var_dump($payments);
-        exit;
+        $resp = $req->getProfile();
+        // var_dump($resp);exit;
 
-        $payments = array_map(PaymentProfile::fromMaskedArray(), $payments);
+        $profile = $resp->getProfile();
+        $payments = $profile->getPaymentProfiles();
+        
+
+
+        $payments = array_map("PaymentProfile::fromMaskedArray", $payments);
+
+        // var_dump($payments);
+        // exit;
+
 
         // Make this block optional, for now.
         if(false && self::SHOW_EXPIRATION_DATES) {
