@@ -2,6 +2,8 @@
 
 use function Mysql\select;
 
+
+
 class PaymentProfileManagerModule extends Module {
 
     public function __construct() {
@@ -9,111 +11,74 @@ class PaymentProfileManagerModule extends Module {
         parent::__construct();
     }
 
-    /**
-     * 
-     */
-    /**
-     * Test function from our meeting.
-     */
-        public function updatePaymentProfile($profileId = "904941070") {
 
-            $customerId = "905125806";
-    
-            // Set the transaction's refId
-            $refId = 'ref' . time();
-    
-            $get = new AnetAPI\GetCustomerPaymentProfileRequest();
-            $get->setMerchantAuthentication(MerchantAuthentication::get());
-            $get->setRefId($refId);
-            $get->setCustomerProfileId($customerId);
-            $get->setCustomerPaymentProfileId($profileId);
-            
-            $client = new AnetController\GetCustomerPaymentProfileController($get);
-            $resp = $client->executeWithApiResponse( \net\authorize\api\constants\ANetEnvironment::SANDBOX);
     
     
-            $existing = $resp->getPaymentProfile();
-            $payment = $existing->getPayment();
-            $card = $payment->getCreditCard();
-            $cardno = $card->getCardNumber();
-            $cardexp = $card->getExpirationDate();
-    
-            // var_dump($card,$cardno,$cardexp);exit;
-            $existingBillTo = $existing->getbillTo();
-    
-    
-            $creditCard = new AnetAPI\CreditCardType();
-            $creditCard->setCardNumber($card->getCardNumber());//"4111111111111111" );
-            $creditCard->setExpirationDate("2023-01");//"2038-12");
-            
-            $paymentCreditCard = new AnetAPI\PaymentType();
-            $paymentCreditCard->setCreditCard($creditCard);
-    
-            $profile = new AnetAPI\CustomerPaymentProfileExType();
-            // $profile->setBillTo($existingBillTo);
-            $profile->setCustomerPaymentProfileId($profileId);
-            $profile->setPayment($paymentCreditCard);
-            
-    
-    
-            // Assemble the complete transaction request
-            $req = new AnetAPI\UpdateCustomerPaymentProfileRequest();
-            $req->setMerchantAuthentication(MerchantAuthentication::get());
-    
-            // Add an existing profile id to the request
-            $req->setCustomerProfileId($customerId);
-            // $req->setPaymentProfile($profile);
-            $req->setPaymentProfile($profile); // Will this work?
-            // $req->setValidationMode("liveMode");
-    
-    
-    
-            // Create the controller and get the response
-            $controller = new AnetController\UpdateCustomerPaymentProfileController($req);
-    
-            $resp = $controller->executeWithApiResponse( \net\authorize\api\constants\ANetEnvironment::SANDBOX);
-    
-            var_dump($resp);
-    
-            exit;
-        
-    }
-    
-    // I am just going to try to get all of the customer's payment profiles here.
+    // Retrive the current customer's payment profiles here.
     public function index() {
 
-        $customerProfile = $this->getCustomerProfile();
+        $user = current_user();
 
-        if(empty($customerProfile) && AUTHORIZE_DOT_NET_AUTO_ENROLL) {
+        $api = $this->loadForceApi();
 
-            return $this->enroll();
+        $query = "SELECT Contact.AuthorizeDotNetCustomerProfileId__c FROM User WHERE Id = '{$user->getId()}'";
 
-        } else if(empty($customerProfile) && !AUTHORIZE_DOT_NET_AUTO_ENROLL) {
+        $result = $api->query($query)->getRecord();
+        
+        $profileId = $result["Contact"]["AuthorizeDotNetCustomerProfileId__c"];
+
+
+        if(empty($profileId)) {
 
             $message = "Your don't have an Authorize.net customer profile.  Click <a href='/customer/enroll'>here</a> to auto-enroll.";
-            return $this->showMessage($message);
 
-        } else {
+            return AUTHORIZE_DOT_NET_AUTO_ENROLL ? $this->enroll() : $this->showMessage($message);
+        }
+        
+
+
+
+        $req = new AuthNetRequest($profileId);
+        // $endpoint = "GetCustomerPaymentProfiles";
+        // $client = new AuthNetClient($endpoint);
+        // $resp = $client->send($req);// , $endpoint);
+
+        $resp = $req->getPaymentProfiles();
+        
+        $payments = $resp->getPaymentProfiles();
+        
+        var_dump($payments);
+        exit;
+
+        $payments = array_map(PaymentProfile::fromMaskedArray(), $payments);
+
+        // Make this block optional, for now.
+        if(false && self::SHOW_EXPIRATION_DATES) {
 
             $api = $this->loadForceApiFromFlow("usernamepassword");
             $sfPaymentProfiles = PaymentProfile__c::all($api, $customerProfile->getCustomerId());
-            $paymentProfiles = $customerProfile->getPaymentProfiles();
 
-            foreach($paymentProfiles as $pp){
-                foreach($sfPaymentProfiles as $sfpp){
-                    if($pp->Id() == $sfpp["ExternalId__c"]){
+
+            foreach($payments as $pp) {
+                foreach($sfPaymentProfiles as $sfpp) {
+                    if($pp->Id() == $sfpp["ExternalId__c"]) {
                         $pp->setExpirationDate($sfpp["ExpirationDate__c"]);
                         break;
                     }
                 }
             }
+        } 
 
-            $tpl = new Template("cards");
-            $tpl->addPath(__DIR__ . "/templates");
-    
-            return $tpl->render(["paymentProfiles" => $paymentProfiles]);
-        }
+
+        $tpl = new Template("cards");
+        $tpl->addPath(__DIR__ . "/templates");
+
+        return $tpl->render(["paymentProfiles" => $payments]);
+
     }
+
+
+
 
     // Show a form for adding a new payment profile
     public function create() {

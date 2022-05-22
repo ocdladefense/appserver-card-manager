@@ -5,6 +5,9 @@
     "connectedApp":"default",
 	"files": [
         "CustomerProfile.php",
+        "AuthNetRequest.php",
+        "AuthNetResponse.php",
+        "AuthNetClient.php",
         "PaymentProfile.php",
         "PaymentProfile__c.php",
         "MerchantAuthentication.php",
