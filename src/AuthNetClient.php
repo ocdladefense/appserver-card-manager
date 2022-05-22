@@ -3,7 +3,7 @@
 
 use net\authorize\api\contract\v1 as AuthNetAPI;
 use net\authorize\api\controller as AuthNetController;
-use net\authorize\api\constants\AuthNetEnvironment;
+use net\authorize\api\constants\ANetEnvironment as AuthNetEnvironment;
 
 
 class AuthNetClient { 
@@ -25,8 +25,8 @@ class AuthNetClient {
 
         $key = $endpoint . "Request";
 
-        $nsreq = "ANetAPI";
-        $nscon = "ANetController";
+        $nsreq = "net\\authorize\\api\\contract\\v1";
+        $nscon = "net\\authorize\\api\\controller";
 
         $reqClass = $nsreq . "\\" . $key;
         $clientClass = $nscon . "\\" . self::$endpoints[$key];
@@ -48,13 +48,13 @@ class AuthNetClient {
         // Inspect the body of our request.
         // Use keys and values to invoke the appropriate Authnet method names,
         // passing in $value as their parameters.
-        foreach($this-body as $method => $value) {
-            $methodn = "set" . ucasewords($method);
+        foreach($this->body as $method => $value) {
+            $methodn = "set" . ucwords($method);
             $req->{$methodn}($value);
         }
 
         $client = new $clientClass($req);
-        $resp = $client->executeWithApiResponse($this->endpoint);
+        return $client->executeWithApiResponse(self::$endpoint);
 
 
         // throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]
