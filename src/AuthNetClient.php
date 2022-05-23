@@ -10,7 +10,16 @@ class AuthNetClient {
 
     const RESPONSE_OK = "Ok";
 
-    static $endpoint = AuthNetEnvironment::SANDBOX;
+    static $defaultEndpoint = AuthNetEnvironment::SANDBOX;
+
+    private $endpoint; 
+
+
+
+    public function __construct($endpoint) {
+        $this->endpoint = $endpoint;
+    }
+
 
     static $endpoints = array(
         "GetCustomerProfileRequest" => "GetCustomerProfileController",
@@ -21,9 +30,10 @@ class AuthNetClient {
     );
 
 
-    function send($endpoint = "CreateCustomerPaymentProfile") {
+    function send(AuthNetRequest $helper) {
+        $type = $helper->getRequestType();
 
-        $key = $endpoint . "Request";
+        $key = $type . "Request";
 
         $nsreq = "net\\authorize\\api\\contract\\v1";
         $nscon = "net\\authorize\\api\\controller";
@@ -32,12 +42,6 @@ class AuthNetClient {
         $clientClass = $nscon . "\\" . self::$endpoints[$key];
 
         $req = new $reqClass;
-        
-
-        $req->setMerchantAuthentication(MerchantAuthentication::get());
-        $req->setRefId($refId);
-        // $req->setValidationMode("liveMode");
-
         // See foreach loop, below, for algo on how to do this dynamically.
         // $req->setCustomerProfileId($this->profileId);
         // $req->setPaymentProfile($paymentprofile);
@@ -48,13 +52,17 @@ class AuthNetClient {
         // Inspect the body of our request.
         // Use keys and values to invoke the appropriate Authnet method names,
         // passing in $value as their parameters.
-        foreach($this->body as $method => $value) {
+        foreach($helper->getBody() as $method => $value) {
             $methodn = "set" . ucwords($method);
             $req->{$methodn}($value);
         }
 
+        $req->setMerchantAuthentication(MerchantAuthentication::get());
+        // $req->setValidationMode("liveMode");
+        $req->setRefId($refId);
+
         $client = new $clientClass($req);
-        return $client->executeWithApiResponse(self::$endpoint);
+        return $client->executeWithApiResponse($this->endpoint);
 
 
         // throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]
