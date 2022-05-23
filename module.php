@@ -92,18 +92,18 @@ class PaymentProfileManagerModule extends Module {
 
         $paymentProfileId = empty($data->id) ? $resp->getPaymentProfileId() : $data->id;
 
-        $this->savePaymentProfile__c($paymentProfileId);
+        $this->savePaymentProfile__c($paymentProfileId, $data);
 
         return redirect("/cards");
     }
 
 
-    public function savePaymentProfile__c($paymentProfileId) {
+    public function savePaymentProfile__c($paymentProfileId, $data) {
 
         $contactId = current_user()->getContactId();
         $api = $this->loadForceApi();
         $paymentProfile__c = new PaymentProfile__c($api);
-        $resp = $paymentProfile__c->save($contactId, $paymentProfileId, $pProfile);
+        $resp = $paymentProfile__c->save($contactId, $paymentProfileId, $data);
 
         if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
     }
@@ -116,6 +116,11 @@ class PaymentProfileManagerModule extends Module {
         $profileId = current_user()->getExternalCustomerProfileId();
 
         CustomerProfileService::deletePaymentProfile($this->authNetEnvironment, $profileId, $id);
+
+        $api = $this->loadForceApi();
+        $resp = PaymentProfile__c::delete($api, $id);
+
+        if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
 
         return redirect("/cards");
     }
