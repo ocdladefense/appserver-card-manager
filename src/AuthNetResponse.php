@@ -13,17 +13,15 @@ class AuthNetResponse {
     const RESPONSE_OK = "Ok";
 
 
-    private $resp;
-
-    
+    private $response;
 
 
     public function __construct($resp) {
-        $this->resp = $resp;
+
+        $this->response = $resp;
     }
     
-    // Theses errors are probably due to programming errors,
-    // so I'm just gonna throw the exception in the calling code.
+
     public function hasErrors($response) {
 
         return $response->getMessages()->getResultCode() != self::RESPONSE_OK;
@@ -36,8 +34,6 @@ class AuthNetResponse {
     }
 
 
-    // Some errors should be handled in a user-friendly way...hence the next two methods.
-    // (Feels like I'm on the verge of refactoring the way I work with the response)
     public function getErrorMessage() {
 
         return $this->response->getMessages()->getMessage()[0]->getText();

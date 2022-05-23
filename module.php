@@ -25,10 +25,11 @@ class PaymentProfileManagerModule extends Module {
     public function index() {
 
         $user = current_user();
+        $profileId = $user->getExternalCustomerProfileId();
 
         if($user->isGuest()) return $this->showMessage("<a href='/login'>Login</a> to see your saved payment methods.");
 
-        if(empty($user->getExternalCustomerProfileId())) {
+        if(empty($profileId)) {
 
             $message = "Your don't have an Authorize.net customer profile.  Click <a href='/customer/enroll'>here</a> to auto-enroll.";
 
@@ -36,7 +37,7 @@ class PaymentProfileManagerModule extends Module {
         }
         
 
-        $profile = $this->getCustomerProfile();
+        $profile = CustomerProfileService::getProfile($this->authNetEnvironment, $profileId);
 
         $payments = $profile->getPaymentProfiles();
         
@@ -68,8 +69,6 @@ class PaymentProfileManagerModule extends Module {
     }
 
 
-
-
     // Show a form for adding a new payment profile
     public function create() {
 
@@ -77,6 +76,48 @@ class PaymentProfileManagerModule extends Module {
         $tpl->addPath(__DIR__ . "/templates");
 
         return $tpl->render();
+    }
+
+
+    // Save or update a customer payment profile
+    public function save() {
+
+        $data = $this->getRequest()->getBody();
+
+        $profileId = current_user()->getExternalCustomerProfileId();
+
+        $resp = CustomerProfileService::savePaymentProfile($this->authNetEnvironment, $profileId, $data);
+
+        if(!$resp->success()) return $this->showMessage($resp->getErrorMessage());
+
+        $paymentProfileId = empty($data->id) ? $resp->getPaymentProfileId() : $data->id;
+
+        $this->savePaymentProfile__c($paymentProfileId);
+
+        return redirect("/cards");
+    }
+
+
+    public function savePaymentProfile__c($paymentProfileId) {
+
+        $contactId = current_user()->getContactId();
+        $api = $this->loadForceApi();
+        $paymentProfile__c = new PaymentProfile__c($api);
+        $resp = $paymentProfile__c->save($contactId, $paymentProfileId, $pProfile);
+
+        if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
+    }
+    
+
+
+    // Delete a payment profile
+    public function deletePaymentProfile($id) {
+
+        $profileId = current_user()->getExternalCustomerProfileId();
+
+        CustomerProfileService::deletePaymentProfile($this->authNetEnvironment, $profileId, $id);
+
+        return redirect("/cards");
     }
 
 
@@ -94,62 +135,6 @@ class PaymentProfileManagerModule extends Module {
     }
 
 
-    // Save or update a customer payment profile
-    public function save() {
-
-        $pProfile = $this->getRequest()->getBody();
-
-        var_dump($pProfile);exit;
-
-        $cp = $this->getCustomerProfile();
-
-        $pProfileId = $cp->savePaymentProfile($pProfile);
-
-        if(!$cp->success()) return $this->showMessage($cp->getErrorMessage());
-
-        $contactId = $cp->getCustomerId();
-        $api = $this->loadForceApiFromFlow("usernamepassword");
-        $paymentProfile__c = new PaymentProfile__c($api);
-        $resp = $paymentProfile__c->save($contactId, $pProfileId, $pProfile);
-
-        if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
-
-        return redirect("/cards");
-    }
-
-
-    // Delete a payment profile
-    public function delete($id) {
-
-        $user = current_user();
-
-        $profileId = $user->getExternalCustomerProfileId();
-
-        $req = new AuthNetRequest("authnet://DeleteCustomerPaymentProfile");
-        $req->addProperty("customerProfileId", $profileId);
-        $req->addProperty("customerPaymentProfileId", $id);
-        
-        $client = new AuthNetClient($this->authNetEnvironment);
-        $resp = $client->send($req);
-
-        return redirect("/cards");
-    }
-
-
-    public function getCustomerProfile() {
-
-        $user = current_user();
-
-        $profileId = $user->getExternalCustomerProfileId();
-
-        $req = new AuthNetRequest("authnet://GetCustomerProfile");
-        $req->addProperty("customerProfileId", $profileId);
-        
-        $client = new AuthNetClient($this->authNetEnvironment);
-        $resp = $client->send($req);
-
-        return $resp->getProfile();
-    }
 
 
     public function enroll() {

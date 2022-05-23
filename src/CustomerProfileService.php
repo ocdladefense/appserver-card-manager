@@ -31,54 +31,124 @@ class CustomerProfileService {
 
 
     // Get customer profile
-    public function getProfile() {
+    public static function getProfile($env, $profileId) {
 
         $req = new AuthNetRequest("authnet://GetCustomerProfile");
         $req->addProperty("customerProfileId", $profileId);
         
-        $client = new AuthNetClient(AuthNetEnvironment::SANDBOX);
+        $client = new AuthNetClient($env);
         $resp = $client->send($req);
 
-        return $resp->getProfile();
-    }
+        if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
 
-
-
-    public function getPaymentProfiles() {
-
-        $profile = $this->getProfile();
-
-        return $profile->getPaymentProfiles();
+        return $resp->getResponse()->getProfile();
     }
 
 
 
 
-    // Create a new customer profile
-    public static function create($params) {
+    public static function savePaymentProfile($env, $profileId, $data) {
 
-        $cp = new self();
+        $isDefault = empty($data->default) ? false : true;
+        $isUpdate = empty($data->id) ? false : true;
 
-        $customerProfile = new AnetAPI\CustomerProfileType();
-        $customerProfile->setDescription($params["description"]);
-        $customerProfile->setMerchantCustomerId($params["customerId"]);
-        $customerProfile->setEmail($params["email"]);
+        $paymentType = self::getPaymentType($data);
+        $billTo = self::getBillTo($data);
 
-        $request = new AnetAPI\CreateCustomerProfileRequest();
-        $request->setMerchantAuthentication(MerchantAuthentication::get());
-        $request->setProfile($customerProfile);
+        $paymentProfile = $isUpdate ? new AuthNetAPI\CustomerPaymentProfileExType() : new AuthNetAPI\CustomerPaymentProfileType();
 
-        $controller = new AnetController\CreateCustomerProfileController($request);
-        $response = $controller->executeWithApiResponse($cp->endpoint);
+        if($isUpdate) $paymentprofile->setCustomerPaymentProfileId($profile->id);
 
-        if($cp->hasErrors($response)) {
+        $paymentProfile->setCustomerType('individual');
+        $paymentProfile->setBillTo($billTo);
+        $paymentProfile->setPayment($paymentType);
+        $paymentProfile->setDefaultPaymentProfile($isDefault);
 
-            $errorMessages = $response->getMessages()->getMessage();
-            throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
-        }
+        $requestType = $isUpdate ? "UpdateCustomerPaymentProfile" : "CreateCustomerPaymentProfile";
 
-        return $response;
+        $req = new AuthNetRequest("authnet://$requestType");
+        $req->addProperty("customerProfileId", $profileId);
+        $req->addProperty("paymentProfile", $paymentProfile);
+        
+        $client = new AuthNetClient($env);
+        return $client->send($req);
+
+        // might need to return the id of the response or the original id in the data!!!!
     }
+
+
+    public static function getPaymentType($data) {
+
+        $creditCard = new AuthNetAPI\CreditCardType();
+        $creditCard->setCardNumber($data->cardNumber);
+        $creditCard->setExpirationDate($data->expYear . "-" . $data->expMonth);
+        $paymentType = new AuthNetAPI\PaymentType();
+        $paymentType->setCreditCard($creditCard);
+
+        return $paymentType;
+    }
+    
+
+    public static function getBillTo($data) {
+
+        $billto = new AuthNetAPI\CustomerAddressType();
+        $billto->setFirstName($data->firstName);
+        $billto->setLastName($data->lastName);
+        // $billto->setCompany("Souveniropolis");
+        $billto->setAddress($data->address);
+        $billto->setCity($data->city);
+        $billto->setState($data->state);
+        $billto->setZip($data->zip);
+        $billto->setCountry("USA");
+        $billto->setPhoneNumber($data->phone);
+
+        return $billto;
+    }
+
+    // Delete a payment profile
+    public static function deletePaymentProfile($env, $profileId, $paymentProfileId) {
+
+        $req = new AuthNetRequest("authnet://DeleteCustomerPaymentProfile");
+        $req->addProperty("customerProfileId", $profileId);
+        $req->addProperty("customerPaymentProfileId", $paymentProfileId);
+        
+        $client = new AuthNetClient($env);
+        $resp = $client->send($req);
+
+        if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
+    }
+
+
+
+    // // Create a new customer profile
+    // public static function create($params) {
+
+    //     $cp = new self();
+
+    //     $customerProfile = new AnetAPI\CustomerProfileType();
+    //     $customerProfile->setDescription($params["description"]);
+    //     $customerProfile->setMerchantCustomerId($params["customerId"]);
+    //     $customerProfile->setEmail($params["email"]);
+
+    //     $request = new AnetAPI\CreateCustomerProfileRequest();
+    //     $request->setMerchantAuthentication(MerchantAuthentication::get());
+    //     $request->setProfile($customerProfile);
+
+    //     $controller = new AnetController\CreateCustomerProfileController($request);
+    //     $response = $controller->executeWithApiResponse($cp->endpoint);
+
+    //     if($cp->hasErrors($response)) {
+
+    //         $errorMessages = $response->getMessages()->getMessage();
+    //         throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
+    //     }
+
+    //     return $response;
+    // }
+
+
+
+
 
     // Get customer profile
     // public function getProfile() {
@@ -115,132 +185,27 @@ class CustomerProfileService {
     // }
 
 
-    public function getPaymentProfile($profileId) {
+    // public function getPaymentProfile($profileId) {
 
-        $request = new AnetAPI\GetCustomerPaymentProfileRequest();
-        $request->setMerchantAuthentication(MerchantAuthentication::get());
-        $request->setRefId( $refId);
-        $request->setCustomerProfileId($this->profileId);
-        $request->setCustomerPaymentProfileId($profileId);
+    //     $request = new AnetAPI\GetCustomerPaymentProfileRequest();
+    //     $request->setMerchantAuthentication(MerchantAuthentication::get());
+    //     $request->setRefId( $refId);
+    //     $request->setCustomerProfileId($this->profileId);
+    //     $request->setCustomerPaymentProfileId($profileId);
     
-        $controller = new AnetController\GetCustomerPaymentProfileController($request);
-        $response = $controller->executeWithApiResponse($this->endpoint);
+    //     $controller = new AnetController\GetCustomerPaymentProfileController($request);
+    //     $response = $controller->executeWithApiResponse($this->endpoint);
 
-        if($this->hasErrors($response)) {
+    //     if($this->hasErrors($response)) {
 
-            $errorMessages = $response->getMessages()->getMessage();
-            throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
-        }
+    //         $errorMessages = $response->getMessages()->getMessage();
+    //         throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
+    //     }
 
-        $paymentProfile = $response->getPaymentProfile();
+    //     $paymentProfile = $response->getPaymentProfile();
 
-        return PaymentProfile::fromMaskedArray($paymentProfile);
-    }
-
-
-    public function savePaymentProfile($profile){
-
-        $isDefault = empty($profile->default) ? false : true;
-        $isUpdate = empty($profile->id) ? false : true;
-
-        // Set credit card information for payment profile
-        $creditCard = new AnetAPI\CreditCardType();
-        $creditCard->setCardNumber($profile->cardNumber);
-        $creditCard->setExpirationDate($profile->expYear . "-" . $profile->expMonth);
-        $paymentCreditCard = new AnetAPI\PaymentType();
-        $paymentCreditCard->setCreditCard($creditCard);
-
-
-        // Create the Bill To info for new payment type
-        $billto = new AnetAPI\CustomerAddressType();
-        $billto->setFirstName($profile->firstName);
-        $billto->setLastName($profile->lastName);
-        // $billto->setCompany("Souveniropolis");
-        $billto->setAddress($profile->address);
-        $billto->setCity($profile->city);
-        $billto->setState($profile->state);
-        $billto->setZip($profile->zip);
-        $billto->setCountry("USA");
-        $billto->setPhoneNumber($profile->phone);
-
-        // Create a new Customer Payment Profile object
-        $paymentprofile = $isUpdate ? new AnetAPI\CustomerPaymentProfileExType() : new AnetAPI\CustomerPaymentProfileType();
-
-        if($isUpdate) $paymentprofile->setCustomerPaymentProfileId($profile->id);
-
-        $paymentprofile->setCustomerType('individual');
-        $paymentprofile->setBillTo($billto);
-        $paymentprofile->setPayment($paymentCreditCard);
-        $paymentprofile->setDefaultPaymentProfile($isDefault);
-
-        // Assemble the complete transaction request
-        $paymentprofilerequest = $isUpdate ? new AnetAPI\UpdateCustomerPaymentProfileRequest() : new AnetAPI\CreateCustomerPaymentProfileRequest();
-        $paymentprofilerequest->setMerchantAuthentication(MerchantAuthentication::get());
-
-        // Add an existing profile id to the request
-        $paymentprofilerequest->setCustomerProfileId($this->profileId);
-        $paymentprofilerequest->setPaymentProfile($paymentprofile);
-        $paymentprofilerequest->setValidationMode("liveMode");
-
-        // Create the controller and get the response
-        $controller = $isUpdate ? new AnetController\UpdateCustomerPaymentProfileController($paymentprofilerequest)
-                    : new AnetController\CreateCustomerPaymentProfileController($paymentprofilerequest);
-
-        $this->response = $controller->executeWithApiResponse($this->endpoint);
-
-        return $isUpdate ? $profile->id : $this->response->getCustomerPaymentProfileId();
-    }
-
-    public function deletePaymentProfile($pProfileId) {
-
-        $request = new AnetAPI\DeleteCustomerPaymentProfileRequest();
-        $request->setMerchantAuthentication(MerchantAuthentication::get());
-        $request->setCustomerProfileId($this->profileId);
-        $request->setCustomerPaymentProfileId($pProfileId);
-        $controller = new AnetController\DeleteCustomerPaymentProfileController($request);
-        $response = $controller->executeWithApiResponse($this->endpoint);
-
-        if($this->hasErrors($response)) {
-
-            $errorMessages = $response->getMessages()->getMessage();
-            throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
-        }
-    }
-
-
-    // Theses errors are probably due to programming errors, so Im just gonna throw the exception in the calling code.
-    public function hasErrors($response) {
-
-        return $response->getMessages()->getResultCode() != self::RESPONSE_OK;
-    }
-
-
-    public function getResponse() {
-
-        return $this->response;
-    }
-
-
-    public function getCustomerId() {
-
-        return $this->getProfile()->getMerchantCustomerId();
-    }
-
-
-    // Some errors should be handled in a user-friendly way...hence the next two methods.
-    //(Feels like im on the verge of refactoring the way I work with the response)
-    public function getErrorMessage() {
-
-        return $this->response->getMessages()->getMessage()[0]->getText();
-    }
-
-
-    public function success() {
-
-        return $this->response->getMessages()->getResultCode() == self::RESPONSE_OK;
-    }
-
-
+    //     return PaymentProfile::fromMaskedArray($paymentProfile);
+    // }
 
 
 
@@ -284,64 +249,6 @@ class CustomerProfileService {
 
         // return PaymentProfile::fromMaskedArray($paymentProfile);
     }
-
-
-    public function savePaymentProfile($profile){
-
-        $isDefault = empty($profile->default) ? false : true;
-        $isUpdate = empty($profile->id) ? false : true;
-
-        // Set credit card information for payment profile
-        $creditCard = new AnetAPI\CreditCardType();
-        $creditCard->setCardNumber($profile->cardNumber);
-        $creditCard->setExpirationDate($profile->expYear . "-" . $profile->expMonth);
-        $paymentCreditCard = new AnetAPI\PaymentType();
-        $paymentCreditCard->setCreditCard($creditCard);
-
-
-        // Create the Bill To info for new payment type
-        $billto = new AnetAPI\CustomerAddressType();
-        $billto->setFirstName($profile->firstName);
-        $billto->setLastName($profile->lastName);
-        // $billto->setCompany("Souveniropolis");
-        $billto->setAddress($profile->address);
-        $billto->setCity($profile->city);
-        $billto->setState($profile->state);
-        $billto->setZip($profile->zip);
-        $billto->setCountry("USA");
-        $billto->setPhoneNumber($profile->phone);
-
-        // Create a new Customer Payment Profile object
-        $paymentprofile = $isUpdate ? new AnetAPI\CustomerPaymentProfileExType() : new AnetAPI\CustomerPaymentProfileType();
-
-        if($isUpdate) $paymentprofile->setCustomerPaymentProfileId($profile->id);
-
-        $paymentprofile->setCustomerType('individual');
-        $paymentprofile->setBillTo($billto);
-        $paymentprofile->setPayment($paymentCreditCard);
-        $paymentprofile->setDefaultPaymentProfile($isDefault);
-
-        // Assemble the complete transaction request
-        $endpoint = $isUpdate ? "UpdateCustomerPaymentProfile" : "CreateCustomerPaymentProfile";
-
-        $resp = $this->send($endpoint);
-
-        return $isUpdate ? $profile->id : $this->response->getCustomerPaymentProfileId();
-    }
-
-
-    private function updatePaymentProfile($profileId) {
-
-    }
-
-    private function createPaymentProfile() {
-
-    }
-
-
-
-
-
 
 /**
    // Test function from our meeting.
