@@ -1,6 +1,7 @@
 <?php
 
 use function Mysql\select;
+use net\authorize\api\constants\ANetEnvironment as AuthNetEnvironment;
 
 
 
@@ -24,15 +25,10 @@ class PaymentProfileManagerModule extends Module {
 
         $user = current_user();
 
-        $api = $this->loadForceApi();
 
-        $query = "SELECT Contact.AuthorizeDotNetCustomerProfileId__c FROM User WHERE Id = '{$user->getId()}'";
+        $profileId = $user->getExternalCustomerProfileId();
 
-        $result = $api->query($query)->getRecord();
-        
-        $profileId = $result["Contact"]["AuthorizeDotNetCustomerProfileId__c"];
-
-
+        // var_dump($profileId);exit;
 
         if(empty($profileId)) {
 
@@ -41,17 +37,11 @@ class PaymentProfileManagerModule extends Module {
             return AUTHORIZE_DOT_NET_AUTO_ENROLL ? $this->enroll() : $this->showMessage($message);
         }
         
-
-
-
-        $req = new AuthNetRequest($profileId);
+        $req = new AuthNetRequest("authnet://GetCustomerProfile");
+        $req->addProperty("customerProfileId", $profileId);
         
-        // $endpoint = "GetCustomerPaymentProfiles";
-        // $client = new AuthNetClient($endpoint);
-        // $resp = $client->send($req);// , $endpoint);
-
-        $resp = $req->getProfile();
-        // var_dump($resp);exit;
+        $client = new AuthNetClient(AuthNetEnvironment::SANDBOX);
+        $resp = $client->send($req);
 
         $profile = $resp->getProfile();
         $payments = $profile->getPaymentProfiles();
@@ -86,7 +76,6 @@ class PaymentProfileManagerModule extends Module {
         $tpl->addPath(__DIR__ . "/templates");
 
         return $tpl->render(["paymentProfiles" => $payments]);
-
     }
 
 
