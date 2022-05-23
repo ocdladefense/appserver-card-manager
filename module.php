@@ -9,12 +9,18 @@ class PaymentProfileManagerModule extends Module {
 
     const SHOW_EXPIRATION_DATES = true;
 
-    public $authNetEnvironment;
+    private $customerProfileService;
     
 
     public function __construct() {
 
-        $this->authNetEnvironment = AUTHORIZE_DOT_NET_USE_PRODUCTION_ENDPOINT ? AuthNetEnvironment::PRODUCTION : AuthNetEnvironment::SANDBOX;  
+        $this->user = current_user();
+
+        $profileId = $this->user->getExternalCustomerProfileId();
+
+        $env = AUTHORIZE_DOT_NET_USE_PRODUCTION_ENDPOINT ? AuthNetEnvironment::PRODUCTION : AuthNetEnvironment::SANDBOX; 
+        
+        $this->customerProfileService = CustomerProfileService::newFromEnvironment($env, $profileId);
 
         parent::__construct();
     }
@@ -24,12 +30,9 @@ class PaymentProfileManagerModule extends Module {
     // Retrive the current customer's payment profiles here.
     public function index() {
 
-        $user = current_user();
-        $profileId = $user->getExternalCustomerProfileId();
+        if($this->user->isGuest()) return $this->showMessage("<a href='/login'>Login</a> to see your saved payment methods.");
 
-        if($user->isGuest()) return $this->showMessage("<a href='/login'>Login</a> to see your saved payment methods.");
-
-        if(empty($profileId)) {
+        if(empty($this->user->getExternalCustomerProfileId())) {
 
             $message = "Your don't have an Authorize.net customer profile.  Click <a href='/customer/enroll'>here</a> to auto-enroll.";
 
@@ -37,7 +40,7 @@ class PaymentProfileManagerModule extends Module {
         }
         
 
-        $profile = CustomerProfileService::getProfile($this->authNetEnvironment, $profileId);
+        $profile = $this->customerProfileService->getProfile();
 
         $payments = $profile->getPaymentProfiles();
         
@@ -48,7 +51,7 @@ class PaymentProfileManagerModule extends Module {
         if(self::SHOW_EXPIRATION_DATES) {
 
             $api = $this->loadForceApi();
-            $sfPaymentProfiles = PaymentProfile__c::all($api, $user->getContactId());
+            $sfPaymentProfiles = PaymentProfile__c::all($api, $this->user->getContactId());
 
 
             foreach($payments as $pp) {
@@ -69,28 +72,16 @@ class PaymentProfileManagerModule extends Module {
     }
 
 
-    // Show a form for adding a new payment profile
-    public function create() {
-
-        $tpl = new Template("create");
-        $tpl->addPath(__DIR__ . "/templates");
-
-        return $tpl->render();
-    }
-
-
     // Save or update a customer payment profile
     public function save() {
 
         $data = $this->getRequest()->getBody();
 
-        $profileId = current_user()->getExternalCustomerProfileId();
-
-        $resp = CustomerProfileService::savePaymentProfile($this->authNetEnvironment, $profileId, $data);
+        $resp = $this->customerProfileService->savePaymentProfile($data);
 
         if(!$resp->success()) return $this->showMessage($resp->getErrorMessage());
 
-        $paymentProfileId = empty($data->id) ? $resp->getResponse()->getCustomerPaymentProfileId() : $data->id;
+        $paymentProfileId = empty($data->id) ? $resp->getCustomerPaymentProfileId() : $data->id;
 
         $this->savePaymentProfile__c($paymentProfileId, $data);
 
@@ -100,7 +91,7 @@ class PaymentProfileManagerModule extends Module {
 
     public function savePaymentProfile__c($paymentProfileId, $data) {
 
-        $contactId = current_user()->getContactId();
+        $contactId = $this->user->getContactId();
         $api = $this->loadForceApi();
         $paymentProfile__c = new PaymentProfile__c($api);
         $resp = $paymentProfile__c->save($contactId, $paymentProfileId, $data);
@@ -113,9 +104,7 @@ class PaymentProfileManagerModule extends Module {
     // Delete a payment profile
     public function deletePaymentProfile($id) {
 
-        $profileId = current_user()->getExternalCustomerProfileId();
-
-        CustomerProfileService::deletePaymentProfile($this->authNetEnvironment, $profileId, $id);
+        $this->customerProfileService->deletePaymentProfile($id);
 
         $api = $this->loadForceApi();
         $resp = PaymentProfile__c::delete($api, $id);
@@ -126,12 +115,21 @@ class PaymentProfileManagerModule extends Module {
     }
 
 
+    // Show a form for adding a new payment profile
+    public function create() {
+
+        $tpl = new Template("create");
+        $tpl->addPath(__DIR__ . "/templates");
+
+        return $tpl->render();
+    }
+
+
+
     // Shows one profile in an editable form.
     public function edit($id) {
 
-        $profileId = current_user()->getExternalCustomerProfileId();
-
-        $profile = CustomerProfileService::getPaymentProfile($this->authNetEnvironment, $profileId, $id);
+        $profile = $this->customerProfileService->getPaymentProfile($id);
 
         $profile = PaymentProfile::fromMaskedArray($profile);
 

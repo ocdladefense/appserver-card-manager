@@ -10,12 +10,12 @@ class CustomerProfileService {
 
     private $profileId;
 
-    private $environment;
+    private $env;
 
 
     private function __construct($env) {
 
-        $this->environment = $env;
+        $this->env = $env;
     }
 
 
@@ -23,6 +23,8 @@ class CustomerProfileService {
 
         $instance = new CustomerProfileService($env);
         $instance->setProfileId($profileId);
+
+        return $instance;
     }
 
     private function setProfileId($profileId) {
@@ -33,44 +35,44 @@ class CustomerProfileService {
 
 
     // Get customer profile
-    public static function getProfile($env, $profileId) {
+    public function getProfile() {
 
         $req = new AuthNetRequest("authnet://GetCustomerProfile");
-        $req->addProperty("customerProfileId", $profileId);
+        $req->addProperty("customerProfileId", $this->profileId);
         
-        $client = new AuthNetClient($env);
+        $client = new AuthNetClient($this->env);
         $resp = $client->send($req);
 
         if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
 
-        return $resp->getResponse()->getProfile();
+        return $resp->getProfile();
     }
 
 
-    public static function getPaymentProfile($env, $profileId, $paymentProfileId) {
+    public function getPaymentProfile($paymentProfileId) {
 
         $req = new AuthNetRequest("authnet://GetCustomerPaymentProfile");
-        $req->addProperty("customerProfileId", $profileId);
+        $req->addProperty("customerProfileId", $this->profileId);
         $req->addProperty("customerPaymentProfileId", $paymentProfileId);
         
-        $client = new AuthNetClient($env);
+        $client = new AuthNetClient($this->env);
         $resp = $client->send($req);
 
         if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
 
-        return $resp->getResponse()->getPaymentProfile();
+        return $resp->getPaymentProfile();
     }
 
 
 
 
-    public static function savePaymentProfile($env, $profileId, $data) {
+    public function savePaymentProfile($data) {
 
         $isDefault = empty($data->default) ? false : true;
         $isUpdate = empty($data->id) ? false : true;
 
-        $paymentType = self::getPaymentType($data);
-        $billTo = self::getBillTo($data);
+        $paymentType = $this->getPaymentType($data);
+        $billTo = $this->getBillTo($data);
 
         $paymentProfile = $isUpdate ? new AuthNetAPI\CustomerPaymentProfileExType() : new AuthNetAPI\CustomerPaymentProfileType();
 
@@ -84,16 +86,16 @@ class CustomerProfileService {
         $requestType = $isUpdate ? "UpdateCustomerPaymentProfile" : "CreateCustomerPaymentProfile";
 
         $req = new AuthNetRequest("authnet://$requestType");
-        $req->addProperty("customerProfileId", $profileId);
+        $req->addProperty("customerProfileId", $this->profileId);
         $req->addProperty("paymentProfile", $paymentProfile);
         
-        $client = new AuthNetClient($env);
+        $client = new AuthNetClient($this->env);
         
         return $client->send($req);
     }
 
 
-    public static function getPaymentType($data) {
+    public function getPaymentType($data) {
 
         $creditCard = new AuthNetAPI\CreditCardType();
         $creditCard->setCardNumber($data->cardNumber);
@@ -105,7 +107,7 @@ class CustomerProfileService {
     }
     
 
-    public static function getBillTo($data) {
+    public function getBillTo($data) {
 
         $billto = new AuthNetAPI\CustomerAddressType();
         $billto->setFirstName($data->firstName);
@@ -122,13 +124,13 @@ class CustomerProfileService {
     }
 
     // Delete a payment profile
-    public static function deletePaymentProfile($env, $profileId, $paymentProfileId) {
+    public function deletePaymentProfile($paymentProfileId) {
 
         $req = new AuthNetRequest("authnet://DeleteCustomerPaymentProfile");
-        $req->addProperty("customerProfileId", $profileId);
+        $req->addProperty("customerProfileId", $this->profileId);
         $req->addProperty("customerPaymentProfileId", $paymentProfileId);
         
-        $client = new AuthNetClient($env);
+        $client = new AuthNetClient($this->env);
         $resp = $client->send($req);
 
         if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
@@ -163,26 +165,6 @@ class CustomerProfileService {
     // }
 
 
-
-
-
-    // Get customer profile
-    // public function getProfile() {
-
-    //     $request = new AnetAPI\GetCustomerProfileRequest();
-    //     $request->setMerchantAuthentication(MerchantAuthentication::get());
-    //     $request->setCustomerProfileId($this->profileId);
-    //     $controller = new AnetController\GetCustomerProfileController($request);
-    //     $response = $controller->executeWithApiResponse($this->endpoint);
-
-    //     if($this->hasErrors($response)) {
-
-    //         $errorMessages = $response->getMessages()->getMessage();
-    //         throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
-    //     }
-
-    //     return $response->getProfile();
-    // }
 
 
 

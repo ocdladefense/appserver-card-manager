@@ -12,6 +12,8 @@ class AuthNetResponse {
 
     const RESPONSE_OK = "Ok";
 
+    const RESPONSE_ERROR = "Error";
+
 
     private $response;
 
@@ -24,13 +26,40 @@ class AuthNetResponse {
 
     public function hasErrors($response) {
 
-        return $response->getMessages()->getResultCode() != self::RESPONSE_OK;
+        return $response->getMessages()->getResultCode() == self::RESPONSE_ERROR;
     }
 
 
     public function getResponse() {
 
         return $this->response;
+    }
+
+
+    public function getProfile() {
+
+        return $this->response->getProfile();
+    }
+
+    public function getPaymentProfile() {
+
+        return $this->response->getPaymentProfile();
+    }
+
+    public function getCustomerPaymentProfileId() {
+
+        return $this->response->getCustomerPaymentProfileId();
+    }
+
+    public function getPaymentProfiles() {
+
+        return $this->getProfile()->getPaymentProfiles();
+    }
+
+
+    public function getMessages() {
+
+        return $this->response->getMessages();
     }
 
 
