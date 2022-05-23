@@ -81,38 +81,38 @@ class CustomerProfileService {
     }
 
     // Get customer profile
-    public function getProfile() {
+    // public function getProfile() {
 
-        $request = new AnetAPI\GetCustomerProfileRequest();
-        $request->setMerchantAuthentication(MerchantAuthentication::get());
-        $request->setCustomerProfileId($this->profileId);
-        $controller = new AnetController\GetCustomerProfileController($request);
-        $response = $controller->executeWithApiResponse($this->endpoint);
+    //     $request = new AnetAPI\GetCustomerProfileRequest();
+    //     $request->setMerchantAuthentication(MerchantAuthentication::get());
+    //     $request->setCustomerProfileId($this->profileId);
+    //     $controller = new AnetController\GetCustomerProfileController($request);
+    //     $response = $controller->executeWithApiResponse($this->endpoint);
 
-        if($this->hasErrors($response)) {
+    //     if($this->hasErrors($response)) {
 
-            $errorMessages = $response->getMessages()->getMessage();
-            throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
-        }
+    //         $errorMessages = $response->getMessages()->getMessage();
+    //         throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
+    //     }
 
-        return $response->getProfile();
-    }
+    //     return $response->getProfile();
+    // }
 
 
     // Get all payment profiles associated with a customer's profile.
-    public function getPaymentProfiles() {
+    // public function getPaymentProfiles() {
 
-        $pProfiles = $this->getProfile()->getPaymentProfiles();
+    //     $pProfiles = $this->getProfile()->getPaymentProfiles();
         
-        $paymentProfiles = [];
+    //     $paymentProfiles = [];
 
-        foreach($pProfiles as $paymentProfile) {
+    //     foreach($pProfiles as $paymentProfile) {
 
-            $paymentProfiles[] = PaymentProfile::fromMaskedArray($paymentProfile);
-        }
+    //         $paymentProfiles[] = PaymentProfile::fromMaskedArray($paymentProfile);
+    //     }
         
-        return $paymentProfiles;
-    }
+    //     return $paymentProfiles;
+    // }
 
 
     public function getPaymentProfile($profileId) {

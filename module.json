@@ -22,9 +22,7 @@
 	"routes": {
         "cards":{
             "callback":"index",
-            "content-type":"text/html",
-			"access":"is_authenticated",
-			"authorization":"webserver"
+            "content-type":"text/html"
         },
         "customer/%contactId/save":{
             "callback":"saveCustomer",

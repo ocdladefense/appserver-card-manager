@@ -7,28 +7,28 @@ use net\authorize\api\constants\ANetEnvironment as AuthNetEnvironment;
 
 class PaymentProfileManagerModule extends Module {
 
+    const SHOW_EXPIRATION_DATES = true;
 
-
-    const SHOW_EXPIRATION_DATES = false;
+    public $authNetEnvironment;
     
 
     public function __construct() {
+
+        $this->authNetEnvironment = AUTHORIZE_DOT_NET_USE_PRODUCTION_ENDPOINT ? AuthNetEnvironment::PRODUCTION : AuthNetEnvironment::SANDBOX;  
 
         parent::__construct();
     }
 
 
     
-    
     // Retrive the current customer's payment profiles here.
     public function index() {
 
         $user = current_user();
 
-
         $profileId = $user->getExternalCustomerProfileId();
 
-        // var_dump($profileId);exit;
+        if($user->isGuest()) return $this->showMessage("<a href='/login'>Login</a> to see your saved payment methods.");
 
         if(empty($profileId)) {
 
@@ -37,28 +37,19 @@ class PaymentProfileManagerModule extends Module {
             return AUTHORIZE_DOT_NET_AUTO_ENROLL ? $this->enroll() : $this->showMessage($message);
         }
         
-        $req = new AuthNetRequest("authnet://GetCustomerProfile");
-        $req->addProperty("customerProfileId", $profileId);
-        
-        $client = new AuthNetClient(AuthNetEnvironment::SANDBOX);
-        $resp = $client->send($req);
 
-        $profile = $resp->getProfile();
+        $profile = $this->getCustomerProfile($profileId);
+
         $payments = $profile->getPaymentProfiles();
         
-
-
         $payments = array_map("PaymentProfile::fromMaskedArray", $payments);
-
-        // var_dump($payments);
-        // exit;
 
 
         // Make this block optional, for now.
-        if(false && self::SHOW_EXPIRATION_DATES) {
+        if(self::SHOW_EXPIRATION_DATES) {
 
-            $api = $this->loadForceApiFromFlow("usernamepassword");
-            $sfPaymentProfiles = PaymentProfile__c::all($api, $customerProfile->getCustomerId());
+            $api = $this->loadForceApi();
+            $sfPaymentProfiles = PaymentProfile__c::all($api, $user->getContactId());
 
 
             foreach($payments as $pp) {
@@ -145,17 +136,15 @@ class PaymentProfileManagerModule extends Module {
     }
 
 
-    public function getCustomerProfile() {
+    public function getCustomerProfile($profileId) {
 
-        $user = current_user();
-
-        $query = "SELECT Contact.AuthorizeDotNetCustomerProfileId__c FROM User WHERE Id = '" . $user->getId() . "'";
-
-        $result = $this->loadForceApi()->query($query)->getRecord();
+        $req = new AuthNetRequest("authnet://GetCustomerProfile");
+        $req->addProperty("customerProfileId", $profileId);
         
-        $profileId = $result["Contact"]["AuthorizeDotNetCustomerProfileId__c"];
+        $client = new AuthNetClient($this->authNetEnvironment);
+        $resp = $client->send($req);
 
-        return empty($profileId) ? null : new CustomerProfile($profileId);
+        return $resp->getProfile();
     }
 
 

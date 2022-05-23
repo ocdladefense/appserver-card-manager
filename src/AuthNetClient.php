@@ -31,6 +31,7 @@ class AuthNetClient {
 
 
     function send(AuthNetRequest $helper) {
+        
         $type = $helper->getRequestType();
 
         $key = $type . "Request";
