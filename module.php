@@ -180,7 +180,9 @@ class PaymentProfileManagerModule extends Module {
             "email"       => $email
         ];
 
-        $response = CustomerProfile::create($params);
+        $response = $this->customerProfileService->create($params);
+
+        var_dump($response);exit;
         $profileId = $response->getCustomerProfileId();
 
         $contact = new stdClass();
