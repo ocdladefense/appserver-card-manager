@@ -20,11 +20,13 @@ class CustomerProfileService {
 
 
     public static function newFromEnvironment($env, $profileId) {
+
         $instance = new CustomerProfileService($env);
         $instance->setProfileId($profileId);
     }
 
     private function setProfileId($profileId) {
+
         $this->profileId = $profileId;
     }
 
@@ -45,6 +47,21 @@ class CustomerProfileService {
     }
 
 
+    public static function getPaymentProfile($env, $profileId, $paymentProfileId) {
+
+        $req = new AuthNetRequest("authnet://GetCustomerPaymentProfile");
+        $req->addProperty("customerProfileId", $profileId);
+        $req->addProperty("customerPaymentProfileId", $paymentProfileId);
+        
+        $client = new AuthNetClient($env);
+        $resp = $client->send($req);
+
+        if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
+
+        return $resp->getResponse()->getPaymentProfile();
+    }
+
+
 
 
     public static function savePaymentProfile($env, $profileId, $data) {
@@ -57,7 +74,7 @@ class CustomerProfileService {
 
         $paymentProfile = $isUpdate ? new AuthNetAPI\CustomerPaymentProfileExType() : new AuthNetAPI\CustomerPaymentProfileType();
 
-        if($isUpdate) $paymentprofile->setCustomerPaymentProfileId($profile->id);
+        if($isUpdate) $paymentProfile->setCustomerPaymentProfileId($data->id);
 
         $paymentProfile->setCustomerType('individual');
         $paymentProfile->setBillTo($billTo);
@@ -71,9 +88,8 @@ class CustomerProfileService {
         $req->addProperty("paymentProfile", $paymentProfile);
         
         $client = new AuthNetClient($env);
+        
         return $client->send($req);
-
-        // might need to return the id of the response or the original id in the data!!!!
     }
 
 
@@ -169,45 +185,6 @@ class CustomerProfileService {
     // }
 
 
-    // Get all payment profiles associated with a customer's profile.
-    // public function getPaymentProfiles() {
-
-    //     $pProfiles = $this->getProfile()->getPaymentProfiles();
-        
-    //     $paymentProfiles = [];
-
-    //     foreach($pProfiles as $paymentProfile) {
-
-    //         $paymentProfiles[] = PaymentProfile::fromMaskedArray($paymentProfile);
-    //     }
-        
-    //     return $paymentProfiles;
-    // }
-
-
-    // public function getPaymentProfile($profileId) {
-
-    //     $request = new AnetAPI\GetCustomerPaymentProfileRequest();
-    //     $request->setMerchantAuthentication(MerchantAuthentication::get());
-    //     $request->setRefId( $refId);
-    //     $request->setCustomerProfileId($this->profileId);
-    //     $request->setCustomerPaymentProfileId($profileId);
-    
-    //     $controller = new AnetController\GetCustomerPaymentProfileController($request);
-    //     $response = $controller->executeWithApiResponse($this->endpoint);
-
-    //     if($this->hasErrors($response)) {
-
-    //         $errorMessages = $response->getMessages()->getMessage();
-    //         throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
-    //     }
-
-    //     $paymentProfile = $response->getPaymentProfile();
-
-    //     return PaymentProfile::fromMaskedArray($paymentProfile);
-    // }
-
-
 
 
 
@@ -234,21 +211,6 @@ class CustomerProfileService {
 
 
 
-
-    public function getPaymentProfile($profileId) {
-
-    
-        $this->body = array(
-            "customerProfileId" => $this->profileId,
-            "customerPaymentProfileId" => $profileId
-        );
-
-        return $this->send("GetCustomerPaymentProfileRequest");
-
-        // $paymentProfile = $response->getPaymentProfile();
-
-        // return PaymentProfile::fromMaskedArray($paymentProfile);
-    }
 
 /**
    // Test function from our meeting.

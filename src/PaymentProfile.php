@@ -68,9 +68,26 @@ class PaymentProfile {
         return substr($this->cardNumber, -4);
     }
 
+    public function maskedCardNumber() {
+
+        return $this->cardNumber;
+    }
+
     public function expiresOn() {
 
         return substr($this->expirationDate, 0, -3);
+    }
+
+    public function expYear() {
+
+        $date = new DateTime($this->expirationDate);
+        return $date->format("yy");
+    }
+
+    public function expMonth() {
+
+        $date = new DateTime($this->expirationDate);
+        return $date->format("m");
     }
 
     public function phone() {

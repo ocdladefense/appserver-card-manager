@@ -90,7 +90,7 @@ class PaymentProfileManagerModule extends Module {
 
         if(!$resp->success()) return $this->showMessage($resp->getErrorMessage());
 
-        $paymentProfileId = empty($data->id) ? $resp->getPaymentProfileId() : $data->id;
+        $paymentProfileId = empty($data->id) ? $resp->getResponse()->getCustomerPaymentProfileId() : $data->id;
 
         $this->savePaymentProfile__c($paymentProfileId, $data);
 
@@ -129,10 +129,16 @@ class PaymentProfileManagerModule extends Module {
     // Shows one profile in an editable form.
     public function edit($id) {
 
-        $customerProfile = $this->getCustomerProfile();
+        $profileId = current_user()->getExternalCustomerProfileId();
 
-        $profile = $customerProfile->getPaymentProfile($id);
-        
+        $profile = CustomerProfileService::getPaymentProfile($this->authNetEnvironment, $profileId, $id);
+
+        $profile = PaymentProfile::fromMaskedArray($profile);
+
+        $api = $this->loadForceApi();
+        $sfpp = PaymentProfile__c::get($api, $profile->id);
+        $profile->setExpirationDate($sfpp["ExpirationDate__c"]);
+
         $tpl = new Template("edit");
         $tpl->addPath(__DIR__ . "/templates");
 
