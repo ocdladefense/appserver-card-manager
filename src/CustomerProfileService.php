@@ -137,34 +137,6 @@ class CustomerProfileService {
     }
 
 
-
-    // // Create a new customer profile
-    // public static function create($params) {
-
-    //     $cp = new self();
-
-    //     $customerProfile = new AnetAPI\CustomerProfileType();
-    //     $customerProfile->setDescription($params["description"]);
-    //     $customerProfile->setMerchantCustomerId($params["customerId"]);
-    //     $customerProfile->setEmail($params["email"]);
-
-    //     $request = new AnetAPI\CreateCustomerProfileRequest();
-    //     $request->setMerchantAuthentication(MerchantAuthentication::get());
-    //     $request->setProfile($customerProfile);
-
-    //     $controller = new AnetController\CreateCustomerProfileController($request);
-    //     $response = $controller->executeWithApiResponse($cp->endpoint);
-
-    //     if($cp->hasErrors($response)) {
-
-    //         $errorMessages = $response->getMessages()->getMessage();
-    //         throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]->getText());
-    //     }
-
-    //     return $response;
-    // }
-
-
     // Create a new customer profile
     public function create($params) {
 

@@ -190,6 +190,8 @@ class PaymentProfileManagerModule extends Module {
 
         $resp = $api->upsert("Contact", $contact);
 
+        // Need to reload the user in the session!!!!!
+
         return redirect("/cards");
     }
 
