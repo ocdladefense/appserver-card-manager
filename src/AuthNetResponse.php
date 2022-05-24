@@ -41,6 +41,12 @@ class AuthNetResponse {
         return $this->response->getProfile();
     }
 
+    public function getProfileId() {
+
+        return $this->response->getCustomerProfileId();
+    }
+
+
     public function getPaymentProfile() {
 
         return $this->response->getPaymentProfile();

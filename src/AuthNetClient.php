@@ -26,7 +26,8 @@ class AuthNetClient {
         "GetCustomerPaymentProfileRequest" => "GetCustomerPaymentProfileController",
         "UpdateCustomerPaymentProfileRequest" => "UpdateCustomerPaymentProfileController",
         "CreateCustomerPaymentProfileRequest" => "CreateCustomerPaymentProfileController",
-        "DeleteCustomerPaymentProfileRequest" => "DeleteCustomerPaymentProfileController"
+        "DeleteCustomerPaymentProfileRequest" => "DeleteCustomerPaymentProfileController",
+        "CreateCustomerProfileRequest" => "CreateCustomerProfileController"
     );
 
 

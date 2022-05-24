@@ -182,8 +182,7 @@ class PaymentProfileManagerModule extends Module {
 
         $response = $this->customerProfileService->create($params);
 
-        var_dump($response);exit;
-        $profileId = $response->getCustomerProfileId();
+        $profileId = $response->getProfileId();
 
         $contact = new stdClass();
         $contact->Id = $contactId;

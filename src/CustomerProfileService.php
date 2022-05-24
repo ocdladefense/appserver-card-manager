@@ -168,13 +168,13 @@ class CustomerProfileService {
     // Create a new customer profile
     public function create($params) {
 
-        $profile = new AnetAPI\CustomerProfileType();
+        $profile = new AuthNetApi\CustomerProfileType();
         $profile->setDescription($params["description"]);
         $profile->setMerchantCustomerId($params["customerId"]);
         $profile->setEmail($params["email"]);
 
         $req = new AuthNetRequest("authnet://CreateCustomerProfile");
-        $req->addProperty("customerProfile", $profile);
+        $req->addProperty("profile", $profile);
         
         $client = new AuthNetClient($this->env);
         $resp = $client->send($req);
