@@ -59,7 +59,9 @@ class AuthNetResponse {
 
     public function getPaymentProfiles() {
 
-        return $this->getProfile()->getPaymentProfiles();
+        $payments = $this->getProfile()->getPaymentProfiles();
+        
+        return PaymentProfile::fromMaskedArrays($payments);
     }
 
 

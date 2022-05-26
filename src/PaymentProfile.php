@@ -9,6 +9,7 @@ class PaymentProfile {
     public $cardNumber;
     public $lastFour;
     public $expirationDate;
+    public $date;
     public $unmaskedExpirationDate;
     public $firstName;
     public $lastName;
@@ -20,6 +21,7 @@ class PaymentProfile {
     public $state;
     public $zip;
     public $country;
+    public $dateIsMasked;
 
 
     public function __construct(){}
@@ -32,9 +34,31 @@ class PaymentProfile {
         $profile->cardType = $masked->getPayment()->getCreditCard()->getCardType();
         $profile->cardNumber = $masked->getPayment()->getCreditCard()->getCardNumber();
         $profile->expirationDate = $masked->getPayment()->getCreditCard()->getExpirationDate();
+
+        $profile->dateIsMasked = self::isMaskedDate($profile->expirationDate);
+        if(!$profile->dateIsMasked) $profile->date = new DateTime($profile->expirationDate);
+
         $profile->setPaymentProfileBillingInfo($masked->getBillTo());
 
         return $profile;
+    }
+
+    public static function fromMaskedArrays($masked) {
+
+        $values = array_map("PaymentProfile::fromMaskedArray", $masked);
+
+        $keys = array_map(function($p){
+
+            return $p->Id();
+
+        }, $values);
+
+        return array_combine($keys, $values);
+    }
+
+    private static function isMaskedDate($date){
+
+        return strpos($date, "X") === 0;
     }
 
 
@@ -75,19 +99,17 @@ class PaymentProfile {
 
     public function expiresOn() {
 
-        return substr($this->expirationDate, 0, -3);
+        return $this->expirationDate;
     }
 
     public function expYear() {
 
-        $date = new DateTime($this->expirationDate);
-        return $date->format("Y");
+        return $this->dateIsMasked ? "XX" : $this->date->format("Y");
     }
 
     public function expMonth() {
 
-        $date = new DateTime($this->expirationDate);
-        return $date->format("m");
+        return $this->dateIsMasked ? "XX" : $this->date->format("m");
     }
 
     public function phone() {
