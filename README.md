@@ -1,6 +1,20 @@
 # Payment Profile Manager
 Manage customers' saved payment profiles(cards) on file.
 
+## Meeting notes
+Authorize.net Customer Profiles
+https://developer.authorize.net/api/reference/index.html#customer-profiles
+
+Code review:
+- Return HTTP Response on module.php line 39.
+ - Update Session user with appropriate customerId.
+ - In customer profile service:
+  --  public function getPaymentType($data) { // Move paymentType code (2 lines) out of this function.
+--     public function getBillTo($data) {
+
+    Why are these called getBlah when they are setting?
+
+
 ## Description
 The payment profile manager exposes CRUD operations and related UX to manage customers' saved payment methods on file.
 

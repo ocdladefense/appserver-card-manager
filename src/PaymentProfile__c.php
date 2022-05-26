@@ -21,6 +21,19 @@ class PaymentProfile__c {
         return $resp->getRecords();
     }
 
+
+    public static function get($api, $externalId) {
+
+        $query = "SELECT Id, ExpirationDate__c, ExternalId__c FROM PaymentProfile__c WHERE externalId__c = '$externalId'";
+
+        $resp = $api->query($query);
+
+        if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
+
+        return $resp->getRecord();
+    }
+
+
     public function save($contactId, $pProfileId, $pProfile) {
 
         $expDate = $pProfile->expYear . "-" . $pProfile->expMonth;

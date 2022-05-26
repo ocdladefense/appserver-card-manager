@@ -12,21 +12,21 @@ class AuthNetResponse {
 
     const RESPONSE_OK = "Ok";
 
+    const RESPONSE_ERROR = "Error";
 
-    private $resp;
 
-    
+    private $response;
 
 
     public function __construct($resp) {
-        $this->resp = $resp;
+
+        $this->response = $resp;
     }
     
-    // Theses errors are probably due to programming errors,
-    // so I'm just gonna throw the exception in the calling code.
+
     public function hasErrors($response) {
 
-        return $response->getMessages()->getResultCode() != self::RESPONSE_OK;
+        return $response->getMessages()->getResultCode() == self::RESPONSE_ERROR;
     }
 
 
@@ -36,8 +36,39 @@ class AuthNetResponse {
     }
 
 
-    // Some errors should be handled in a user-friendly way...hence the next two methods.
-    // (Feels like I'm on the verge of refactoring the way I work with the response)
+    public function getProfile() {
+
+        return $this->response->getProfile();
+    }
+
+    public function getProfileId() {
+
+        return $this->response->getCustomerProfileId();
+    }
+
+
+    public function getPaymentProfile() {
+
+        return $this->response->getPaymentProfile();
+    }
+
+    public function getCustomerPaymentProfileId() {
+
+        return $this->response->getCustomerPaymentProfileId();
+    }
+
+    public function getPaymentProfiles() {
+
+        return $this->getProfile()->getPaymentProfiles();
+    }
+
+
+    public function getMessages() {
+
+        return $this->response->getMessages();
+    }
+
+
     public function getErrorMessage() {
 
         return $this->response->getMessages()->getMessage()[0]->getText();

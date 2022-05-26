@@ -26,11 +26,13 @@ class AuthNetClient {
         "GetCustomerPaymentProfileRequest" => "GetCustomerPaymentProfileController",
         "UpdateCustomerPaymentProfileRequest" => "UpdateCustomerPaymentProfileController",
         "CreateCustomerPaymentProfileRequest" => "CreateCustomerPaymentProfileController",
-        "DeleteCustomerPaymentProfileRequest" => "DeleteCustomerPaymentProfileController"
+        "DeleteCustomerPaymentProfileRequest" => "DeleteCustomerPaymentProfileController",
+        "CreateCustomerProfileRequest" => "CreateCustomerProfileController"
     );
 
 
     function send(AuthNetRequest $helper) {
+        
         $type = $helper->getRequestType();
 
         $key = $type . "Request";
@@ -62,14 +64,11 @@ class AuthNetClient {
         $req->setRefId($refId);
 
         $client = new $clientClass($req);
-        return $client->executeWithApiResponse($this->endpoint);
+        $resp = $client->executeWithApiResponse($this->endpoint);
 
+        return new AuthNetResponse($resp);
 
-        // throw new PaymentProfileManagerException($errorMessages[0]->getCode() . " " . $errorMessages[0]
     }
-
-
-
 
 }
 

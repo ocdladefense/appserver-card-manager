@@ -7,58 +7,51 @@ use net\authorize\api\constants\ANetEnvironment as AuthNetEnvironment;
 
 class PaymentProfileManagerModule extends Module {
 
+    const SHOW_EXPIRATION_DATES = true;
 
-
-    const SHOW_EXPIRATION_DATES = false;
+    private $customerProfileService;
     
 
     public function __construct() {
+
+        $this->user = current_user();
+
+        $profileId = $this->user->getExternalCustomerProfileId();
+
+        $env = AUTHORIZE_DOT_NET_USE_PRODUCTION_ENDPOINT ? AuthNetEnvironment::PRODUCTION : AuthNetEnvironment::SANDBOX; 
+        
+        $this->customerProfileService = CustomerProfileService::newFromEnvironment($env, $profileId);
 
         parent::__construct();
     }
 
 
     
-    
     // Retrive the current customer's payment profiles here.
     public function index() {
 
-        $user = current_user();
+        if($this->user->isGuest()) return $this->showMessage("<a href='/login'>Login</a> to see your saved payment methods.");
 
-
-        $profileId = $user->getExternalCustomerProfileId();
-
-        // var_dump($profileId);exit;
-
-        if(empty($profileId)) {
+        if(empty($this->user->getExternalCustomerProfileId())) {
 
             $message = "Your don't have an Authorize.net customer profile.  Click <a href='/customer/enroll'>here</a> to auto-enroll.";
 
             return AUTHORIZE_DOT_NET_AUTO_ENROLL ? $this->enroll() : $this->showMessage($message);
         }
         
-        $req = new AuthNetRequest("authnet://GetCustomerProfile");
-        $req->addProperty("customerProfileId", $profileId);
-        
-        $client = new AuthNetClient(AuthNetEnvironment::SANDBOX);
-        $resp = $client->send($req);
 
-        $profile = $resp->getProfile();
+        $profile = $this->customerProfileService->getProfile();
+
         $payments = $profile->getPaymentProfiles();
         
-
-
         $payments = array_map("PaymentProfile::fromMaskedArray", $payments);
-
-        // var_dump($payments);
-        // exit;
 
 
         // Make this block optional, for now.
-        if(false && self::SHOW_EXPIRATION_DATES) {
+        if(self::SHOW_EXPIRATION_DATES) {
 
-            $api = $this->loadForceApiFromFlow("usernamepassword");
-            $sfPaymentProfiles = PaymentProfile__c::all($api, $customerProfile->getCustomerId());
+            $api = $this->loadForceApi();
+            $sfPaymentProfiles = PaymentProfile__c::all($api, $this->user->getContactId());
 
 
             foreach($payments as $pp) {
@@ -79,64 +72,41 @@ class PaymentProfileManagerModule extends Module {
     }
 
 
-
-
-    // Show a form for adding a new payment profile
-    public function create() {
-
-        if(empty($this->getCustomerProfile())) return redirect("/cards");
-
-        $tpl = new Template("create");
-        $tpl->addPath(__DIR__ . "/templates");
-
-        return $tpl->render();
-    }
-
-
-    // Shows one profile in an editable form.
-    public function edit($id) {
-
-        $customerProfile = $this->getCustomerProfile();
-
-        $profile = $customerProfile->getPaymentProfile($id);
-        
-        $tpl = new Template("edit");
-        $tpl->addPath(__DIR__ . "/templates");
-
-        return $tpl->render(["profile" => $profile]);
-    }
-
-
     // Save or update a customer payment profile
     public function save() {
 
-        $pProfile = $this->getRequest()->getBody();
+        $data = $this->getRequest()->getBody();
 
-        $cp = $this->getCustomerProfile();
+        $resp = $this->customerProfileService->savePaymentProfile($data);
 
-        $pProfileId = $cp->savePaymentProfile($pProfile);
+        if(!$resp->success()) return $this->showMessage($resp->getErrorMessage());
 
-        if(!$cp->success()) return $this->showMessage($cp->getErrorMessage());
+        $paymentProfileId = empty($data->id) ? $resp->getCustomerPaymentProfileId() : $data->id;
 
-        $contactId = $cp->getCustomerId();
-        $api = $this->loadForceApiFromFlow("usernamepassword");
-        $paymentProfile__c = new PaymentProfile__c($api);
-        $resp = $paymentProfile__c->save($contactId, $pProfileId, $pProfile);
-
-        if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
+        $this->savePaymentProfile__c($paymentProfileId, $data);
 
         return redirect("/cards");
     }
 
 
+    public function savePaymentProfile__c($paymentProfileId, $data) {
+
+        $contactId = $this->user->getContactId();
+        $api = $this->loadForceApi();
+        $paymentProfile__c = new PaymentProfile__c($api);
+        $resp = $paymentProfile__c->save($contactId, $paymentProfileId, $data);
+
+        if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
+    }
+    
+
+
     // Delete a payment profile
-    public function delete($id) {
+    public function deletePaymentProfile($id) {
 
-        $customerProfile = $this->getCustomerProfile();
+        $this->customerProfileService->deletePaymentProfile($id);
 
-        $customerProfile->deletePaymentProfile($id);
-
-        $api = $this->loadForceApiFromFlow("usernamepassword");
+        $api = $this->loadForceApi();
         $resp = PaymentProfile__c::delete($api, $id);
 
         if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
@@ -145,18 +115,35 @@ class PaymentProfileManagerModule extends Module {
     }
 
 
-    public function getCustomerProfile() {
+    // Show a form for adding a new payment profile
+    public function create() {
 
-        $user = current_user();
+        $tpl = new Template("create");
+        $tpl->addPath(__DIR__ . "/templates");
 
-        $query = "SELECT Contact.AuthorizeDotNetCustomerProfileId__c FROM User WHERE Id = '" . $user->getId() . "'";
-
-        $result = $this->loadForceApi()->query($query)->getRecord();
-        
-        $profileId = $result["Contact"]["AuthorizeDotNetCustomerProfileId__c"];
-
-        return empty($profileId) ? null : new CustomerProfile($profileId);
+        return $tpl->render();
     }
+
+
+
+    // Shows one profile in an editable form.
+    public function edit($id) {
+
+        $profile = $this->customerProfileService->getPaymentProfile($id);
+
+        $profile = PaymentProfile::fromMaskedArray($profile);
+
+        $api = $this->loadForceApi();
+        $sfpp = PaymentProfile__c::get($api, $profile->id);
+        $profile->setExpirationDate($sfpp["ExpirationDate__c"]);
+
+        $tpl = new Template("edit");
+        $tpl->addPath(__DIR__ . "/templates");
+
+        return $tpl->render(["profile" => $profile]);
+    }
+
+
 
 
     public function enroll() {
@@ -193,14 +180,17 @@ class PaymentProfileManagerModule extends Module {
             "email"       => $email
         ];
 
-        $response = CustomerProfile::create($params);
-        $profileId = $response->getCustomerProfileId();
+        $response = $this->customerProfileService->create($params);
+
+        $profileId = $response->getProfileId();
 
         $contact = new stdClass();
         $contact->Id = $contactId;
         $contact->AuthorizeDotNetCustomerProfileId__c = $profileId;
 
         $resp = $api->upsert("Contact", $contact);
+
+        // Need to reload the user in the session!!!!!
 
         return redirect("/cards");
     }

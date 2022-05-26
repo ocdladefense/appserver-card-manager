@@ -43,7 +43,7 @@
 
                         <div class="col-md-6">
                             <div class="inputbox mt-3 mr-2 w-75">
-                                <input type="text" name="cardNumber" class="form-control" maxlength="16" minlength="16" required />
+                                <input type="text" name="cardNumber" class="form-control" value="<?php print $profile->maskedCardNumber(); ?>" maxlength="16" minlength="16" required />
                                 <i class="fa fa-credit-card"></i>
                                 <span>Card Number</span>
                             </div>
@@ -53,7 +53,7 @@
                             <div class="d-flex flex-row">
 
                             <div class="inputbox mt-3 mr-2 w-25">
-                                    <input type="text" name="expMonth" class="form-control" maxlength="2" minlength="2" placeholder="mm" required />
+                                    <input type="text" name="expMonth" class="form-control" value="<?php print $profile->expMonth(); ?>"maxlength="2" minlength="2" placeholder="mm" required />
                                 <span>exp. month</span>
                             </div>
 
@@ -61,7 +61,7 @@
                             &nbsp;
 
                             <div class="inputbox mt-3 mr-2 w-25">
-                                    <input type="text" name="expYear" class="form-control" maxlength="4" minlength="4" placeholder="yyyy" required />
+                                    <input type="text" name="expYear" class="form-control" value="<?php print $profile->expYear(); ?>"maxlength="4" minlength="4" placeholder="yyyy" required />
                                 <span>exp. year</span>
                             </div>
 

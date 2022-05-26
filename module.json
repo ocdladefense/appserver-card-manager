@@ -4,7 +4,7 @@
 	"description": "A module for allowing users to manage their saved payment profiles.",
     "connectedApp":"default",
 	"files": [
-        "CustomerProfile.php",
+        "CustomerProfileService.php",
         "AuthNetRequest.php",
         "AuthNetResponse.php",
         "AuthNetClient.php",
@@ -22,9 +22,7 @@
 	"routes": {
         "cards":{
             "callback":"index",
-            "content-type":"text/html",
-			"access":"is_authenticated",
-			"authorization":"webserver"
+            "content-type":"text/html"
         },
         "customer/%contactId/save":{
             "callback":"saveCustomer",
@@ -32,33 +30,23 @@
         },
         "customer/enroll":{
             "callback":"enroll",
-            "content-type":"text/html",
-			"access":"is_authenticated",
-			"authorization":"webserver"
+            "content-type":"text/html"
         },
         "card/create":{
             "callback":"create",
-            "content-type":"text/html",
-			"access":"is_authenticated",
-			"authorization":"webserver"
+            "content-type":"text/html"
         },
         "card/edit/%id":{
             "callback":"edit",
-            "content-type":"text/html",
-			"access":"is_authenticated",
-			"authorization":"webserver"
+            "content-type":"text/html"
         },
         "card/save":{
             "callback":"save",
-            "content-type":"text/html",
-			"access":"is_authenticated",
-			"authorization":"webserver"
+            "content-type":"text/html"
         },
         "card/delete/%id":{
-            "callback":"delete",
-            "content-type":"text/html",
-			"access":"is_authenticated",
-			"authorization":"webserver"
+            "callback":"deletePaymentProfile",
+            "content-type":"text/html"
         },
         "cards/test":{
             "callback":"updatePaymentProfile",

@@ -17,6 +17,7 @@ class AuthNetRequest {
     
 
     public function __construct($requestTypeSchema) { 
+
         list($prefix,$requestType) = explode("authnet://",$requestTypeSchema);
 
         $this->requestType = $requestType;
@@ -24,18 +25,22 @@ class AuthNetRequest {
 
 
     public function addProperty($prop,$value) {
+
         $this->body[$prop] = $value;
     }
 
     public function removeProperty($prop) {
+
         unset($this->body[$prop]);
     }
 
     public function getBody() {
+
         return $this->body;
     }
 
     public function getRequestType() {
+        
         return $this->requestType;
     }
 
