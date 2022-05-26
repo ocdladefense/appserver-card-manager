@@ -42,11 +42,11 @@
                         <p><?php print $card->phone(); ?></p>
                     </div>
 
-                    <form class="btn-form" action="/card/delete/<?php print $card->id(); ?>" onSubmit="return confirm('Are you sure you want to delete this payment method?');">
+                    <form class="btn-form" action="/card/<?php print $card->id(); ?>/delete" onSubmit="return confirm('Are you sure you want to delete this payment method?');">
                         <button class="btn btn-primary">Delete</button>
                     </form>
 
-                    <form class="btn-form" action="/card/edit/<?php print $card->id(); ?>" >
+                    <form class="btn-form" action="/card/<?php print $card->id(); ?>/edit" >
                         <button class="btn btn-primary">Edit Card</button>
                     </form>
 
