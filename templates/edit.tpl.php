@@ -127,7 +127,7 @@
 
                         <div class="col-md-6">
                             <div class="inputbox mt-3 mr-2">
-                                <input type="tel" name="phone" class="form-control" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" value="<?php print $profile->phone(); ?>" required />
+                                <input type="tel" name="phone" class="form-control" value="<?php print $profile->phone(); ?>" required />
                                 <span>Phone</span>
                             </div>
                         </div>

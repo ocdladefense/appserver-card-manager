@@ -118,7 +118,7 @@
 
                         <div class="col-md-6">
                             <div class="inputbox mt-3 mr-2">
-                                <input type="tel" name="phone" class="form-control" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="555-555-5555" required />
+                                <input type="tel" name="phone" class="form-control" placeholder="555-555-5555" required />
                                 <span>Phone</span>
                             </div>
                         </div>
