@@ -4,15 +4,14 @@
 	"description": "A module for allowing users to manage their saved payment profiles.",
     "connectedApp":"default",
 	"files": [
-        "CustomerProfileService.php",
         "AuthNetRequest.php",
         "AuthNetResponse.php",
         "AuthNetClient.php",
         "PaymentProfile.php",
         "PaymentProfileEx.php",
-        "PaymentProfile__c.php",
+        "CustomerAddress.php",
         "MerchantAuthentication.php",
-        "PaymentProfileManagerException.php"
+        "PaymentProfileException.php"
     ],
     "links":[{
         "href":"/cards",
@@ -22,7 +21,7 @@
     }],
 	"routes": {
         "cards":{
-            "callback":"index",
+            "callback":"list",
             "content-type":"text/html",
             "access": "is_authenticated",
             "authorization": "webserver"
@@ -33,15 +32,7 @@
             "access": false,
             "authorization": "webserver"
         },
-        "customer/%contactId/save":{
-            "callback":"saveCustomer",
-            "content-type":"text/html"
-        },
-        "card/create":{
-            "callback":"edit",
-            "content-type":"text/html"
-        },
-        "card/edit/%id":{
+        "card/%id/edit":{
             "callback":"edit",
             "content-type":"text/html"
         },
@@ -49,8 +40,12 @@
             "callback":"save",
             "content-type":"text/html"
         },
-        "card/delete/%id":{
+        "card/%id/delete":{
             "callback":"delete",
+            "content-type":"text/html"
+        },
+        "customer/%contactId/save":{
+            "callback":"saveCustomer",
             "content-type":"text/html"
         },
         "record/%recordType/edit":{
