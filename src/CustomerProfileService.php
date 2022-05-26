@@ -49,19 +49,7 @@ class CustomerProfileService {
     }
 
 
-    public function getPaymentProfile($paymentProfileId) {
 
-        $req = new AuthNetRequest("authnet://GetCustomerPaymentProfile");
-        $req->addProperty("customerProfileId", $this->profileId);
-        $req->addProperty("customerPaymentProfileId", $paymentProfileId);
-        
-        $client = new AuthNetClient($this->env);
-        $resp = $client->send($req);
-
-        if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
-
-        return $resp->getPaymentProfile();
-    }
 
 
 

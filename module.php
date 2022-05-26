@@ -139,15 +139,24 @@ class PaymentProfileManagerModule extends Module {
     // Shows one profile in an editable form.
     public function edit($id = null) {
 
-        if(!empty($id)){
+        $profile = null;
 
-            $profile = $this->customerProfileService->getPaymentProfile($id);
+        if(!empty($id)) {
 
-            $profile = PaymentProfile::fromMaskedArray($profile);
+            $req = new AuthNetRequest("authnet://GetCustomerPaymentProfile");
+            $req->addProperty("customerProfileId", $this->profileId);
+            $req->addProperty("customerPaymentProfileId", $id);
+            
+            $client = new AuthNetClient($this->env);
+            $resp = $client->send($req);
+    
+            $profile = $resp->getPaymentProfile();
 
-            $api = $this->loadForceApi();
-            $sfpp = PaymentProfile__c::get($api, $profile->id);
-            $profile->setExpirationDate($sfpp["ExpirationDate__c"]);
+            if(false) {
+                $api = $this->loadForceApi();
+                $sfpp = PaymentProfile__c::get($api, $profile->id);
+                $profile->setExpirationDate($sfpp["ExpirationDate__c"]);
+            }
         }
 
         $tpl = empty($id) ? new Template("create") : new Template("edit");
