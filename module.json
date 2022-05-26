@@ -5,14 +5,36 @@
     "connectedApp":"default",
 	"files": [
         "CustomerProfile.php",
+        "AuthNetRequest.php",
+        "AuthNetResponse.php",
+        "AuthNetClient.php",
         "PaymentProfile.php",
+        "PaymentProfile__c.php",
         "MerchantAuthentication.php",
         "PaymentProfileManagerException.php"
     ],
+    "links":[{
+        "href":"/cards",
+        "label": "Payment Methods",
+        "isSublink": false,
+        "adminLink": false
+    }],
 	"routes": {
-        "cards/show":{
-            "callback":"showAll",
+        "cards":{
+            "callback":"index",
+            "content-type":"text/html",
+			"access":"is_authenticated",
+			"authorization":"webserver"
+        },
+        "customer/%contactId/save":{
+            "callback":"saveCustomer",
             "content-type":"text/html"
+        },
+        "customer/enroll":{
+            "callback":"enroll",
+            "content-type":"text/html",
+			"access":"is_authenticated",
+			"authorization":"webserver"
         },
         "card/create":{
             "callback":"create",
@@ -37,6 +59,10 @@
             "content-type":"text/html",
 			"access":"is_authenticated",
 			"authorization":"webserver"
+        },
+        "cards/test":{
+            "callback":"updatePaymentProfile",
+            "content-type":"text/html"
         }
     }
 }

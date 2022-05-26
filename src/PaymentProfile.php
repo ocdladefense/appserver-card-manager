@@ -9,6 +9,7 @@ class PaymentProfile {
     public $cardNumber;
     public $lastFour;
     public $expirationDate;
+    public $unmaskedExpirationDate;
     public $firstName;
     public $lastName;
     public $phone;
@@ -69,7 +70,7 @@ class PaymentProfile {
 
     public function expiresOn() {
 
-        return $this->expirationDate;
+        return substr($this->expirationDate, 0, -3);
     }
 
     public function phone() {
@@ -128,4 +129,9 @@ class PaymentProfile {
         $this->zip = $billTo->getZip();
         $this->country = $billTo->getCountry();
 	}
+
+    public function setExpirationDate($date) {
+
+        $this->expirationDate = $date;
+    }
 }

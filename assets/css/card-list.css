@@ -1,9 +1,25 @@
-.profile{
-    padding: .7vw;
-}
+
 p{
     margin:0;
 }
 .btn-form{
     display: inline;
+}
+.card{
+    width:27rem;
+    border: 4px solid rgba(0,0,0,.125);
+}
+
+.card-body{
+    padding:5px;
+}
+
+.default{
+    background-color: rgba(0,0,0,.035);
+}
+
+@media screen and (max-width:750px) {
+    .vw-100{
+        width:unset !important;
+    }
 }
