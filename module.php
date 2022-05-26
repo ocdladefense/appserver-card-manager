@@ -26,7 +26,7 @@ class PaymentProfileManagerModule extends Module {
 
         $this->env = AUTHORIZE_DOT_NET_USE_PRODUCTION_ENDPOINT ? AuthNetEnvironment::PRODUCTION : AuthNetEnvironment::SANDBOX; 
         
-        $this->customerProfileService = CustomerProfileService::newFromEnvironment($this->env, $this->profileId);
+        // $this->customerProfileService = CustomerProfileService::newFromEnvironment($this->env, $this->profileId);
 
         $this->hasAuthorizeDotNet = !empty($this->user->getExternalCustomerProfileId());
 
@@ -36,20 +36,20 @@ class PaymentProfileManagerModule extends Module {
 
     
     // Retrive the current customer's payment profiles here.
-    public function index() {
+    public function list() {
 
         $contactId = $this->user->getContactId();
-        $redirect = "/customer/$contactId/save";
+        $url = "/customer/$contactId/save";
 
         if(!$this->hasAuthorizeDotNet && !AUTHORIZE_DOT_NET_AUTO_ENROLL) {
 
-            $message = "Your don't have an Authorize.net customer profile.  Click <a href='$redirect'>here</a> to auto-enroll.";
+            $message = "Your don't have an Authorize.net customer profile.  Click <a href='$url'>here</a> to auto-enroll.";
 
             throw new Exception($message);
 
         } else if(!$this->hasAuthorizeDotNet && AUTHORIZE_DOT_NET_AUTO_ENROLL) {
 
-            return redirect($redirect);
+            return redirect($url);
         }
         
 
@@ -91,31 +91,115 @@ class PaymentProfileManagerModule extends Module {
 
 
 
-    // Save or update a customer payment profile
     public function save() {
 
         $data = $this->getRequest()->getBody();
 
-        $resp = $this->customerProfileService->savePaymentProfile($data);
+        $isUpdate = !empty($data->id);
 
-        if(!$resp->success()) throw new Exception($resp->getErrorMessage());
+        return $isUpdate ? $this->update($data) : $this->insert($data);
+    }
 
-        $paymentProfileId = empty($data->id) ? $resp->getCustomerPaymentProfileId() : $data->id;
 
-        $this->savePaymentProfile__c($paymentProfileId, $data);
+
+    public function update($data) {
+
+
+        $isDefault = !empty($data->default);
+
+        $card = new AuthNetAPI\CreditCardType();
+        $card->setCardNumber($data->cardNumber);
+        $card->setExpirationDate($data->expYear . "-" . $data->expMonth);
+
+        $paymentType = new AuthNetAPI\PaymentType();
+        $paymentType->setCreditCard($creditCard);
+        
+
+        // LEFT OFF HERE!!!!
+        $billTo = $this->getBillTo($data);
+
+        $paymentProfile = $isUpdate ? new AuthNetAPI\CustomerPaymentProfileExType() : new AuthNetAPI\CustomerPaymentProfileType();
+
+        if($isUpdate) $paymentProfile->setCustomerPaymentProfileId($data->id);
+
+        $paymentProfile->setCustomerType('individual');
+        $paymentProfile->setBillTo($billTo);
+        $paymentProfile->setPayment($paymentType);
+        $paymentProfile->setDefaultPaymentProfile($isDefault);
+
+        $requestType = $isUpdate ? "UpdateCustomerPaymentProfile" : "CreateCustomerPaymentProfile";
+
+        $req = new AuthNetRequest("authnet://$requestType");
+        $req->addProperty("customerProfileId", $this->profileId);
+        $req->addProperty("paymentProfile", $paymentProfile);
+        
+        $client = new AuthNetClient($this->env);
+        
+        $resp = $client->send($req);
+
+        if(true) {
+            $paymentProfileId = empty($data->id) ? $resp->getCustomerPaymentProfileId() : $data->id;
+            $this->savePaymentProfile__c($paymentProfileId, $data);
+        }
 
         return redirect("/cards");
     }
 
 
+
+    public function insert($data) {
+
+
+        $isDefault = !empty($data->default);
+
+        $card = new AuthNetAPI\CreditCardType();
+        $card->setCardNumber($data->cardNumber);
+        $card->setExpirationDate($data->expYear . "-" . $data->expMonth);
+
+        $paymentType = new AuthNetAPI\PaymentType();
+        $paymentType->setCreditCard($creditCard);
+        
+
+        // LEFT OFF HERE!!!!
+        $billTo = $this->getBillTo($data);
+
+        $paymentProfile = $isUpdate ? new AuthNetAPI\CustomerPaymentProfileExType() : new AuthNetAPI\CustomerPaymentProfileType();
+
+        if($isUpdate) $paymentProfile->setCustomerPaymentProfileId($data->id);
+
+        $paymentProfile->setCustomerType('individual');
+        $paymentProfile->setBillTo($billTo);
+        $paymentProfile->setPayment($paymentType);
+        $paymentProfile->setDefaultPaymentProfile($isDefault);
+
+        $requestType = $isUpdate ? "UpdateCustomerPaymentProfile" : "CreateCustomerPaymentProfile";
+
+        $req = new AuthNetRequest("authnet://$requestType");
+        $req->addProperty("customerProfileId", $this->profileId);
+        $req->addProperty("paymentProfile", $paymentProfile);
+        
+        $client = new AuthNetClient($this->env);
+        
+        $resp = $client->send($req);
+
+        if(true) {
+            $paymentProfileId = empty($data->id) ? $resp->getCustomerPaymentProfileId() : $data->id;
+            $this->savePaymentProfile__c($paymentProfileId, $data);
+        }
+        
+        return redirect("/cards");
+    }
+
+
+
     public function savePaymentProfile__c($paymentProfileId, $data) {
 
-        $contactId = $this->user->getContactId();
+
         $api = $this->loadForceApi();
         $paymentProfile__c = new PaymentProfile__c($api);
         $resp = $paymentProfile__c->save($contactId, $paymentProfileId, $data);
 
-        if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
+    
     }
     
 
@@ -123,13 +207,23 @@ class PaymentProfileManagerModule extends Module {
     // Delete a payment profile
     public function delete($id) {
 
-        $this->customerProfileService->deletePaymentProfile($id);
+        $req = new AuthNetRequest("authnet://DeleteCustomerPaymentProfile");
+        $req->addProperty("customerProfileId", $this->profileId);
+        $req->addProperty("customerPaymentProfileId", $paymentProfileId);
+        
+        $client = new AuthNetClient($this->env);
+        $resp = $client->send($req);
 
-        $api = $this->loadForceApi();
-        $resp = PaymentProfile__c::delete($api, $id);
 
-        if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
-
+        if(true) {
+            $api = $this->loadForceApi();
+            $query = "SELECT Id FROM PaymentProfile__c WHERE ExternalId__c = '$externalId'";
+            $resp = $api->query($query);
+            $recordId = $resp->getRecord()["Id"];
+    
+            $resp = $api->delete("PaymentProfile__c", $recordId);
+        }
+        
         return redirect("/cards");
     }
 
@@ -166,6 +260,8 @@ class PaymentProfileManagerModule extends Module {
     }
 
 
+
+
     public function saveCustomer($contactId) {
 
         $isAccountAuthorized = false; //Should the contact be allowed to make purchases with the accounts cards on file? (Future Use)
@@ -188,18 +284,57 @@ class PaymentProfileManagerModule extends Module {
             "email"       => $email
         ];
 
-        $response = $this->customerProfileService->create($params);
+        $profile = new AuthNetApi\CustomerProfileType();
+        $profile->setDescription($params["description"]);
+        $profile->setMerchantCustomerId($params["customerId"]);
+        $profile->setEmail($params["email"]);
 
-        $profileId = $response->getProfileId();
+        $req = new AuthNetRequest("authnet://CreateCustomerProfile");
+        $req->addProperty("profile", $profile);
+        
+        $client = new AuthNetClient($this->env);
+        $resp = $client->send($req);
 
-        $contact = new stdClass();
-        $contact->Id = $contactId;
-        $contact->AuthorizeDotNetCustomerProfileId__c = $profileId;
+        $profileId = $resp->getProfileId();
 
-        $resp = $api->upsert("Contact", $contact);
 
+        if(true) {
+            $contact = new stdClass();
+            $contact->Id = $contactId;
+            $contact->AuthorizeDotNetCustomerProfileId__c = $profileId;
+
+            $resp = $api->upsert("Contact", $contact);
+        }
         // Need to reload the user in the session!!!!!
 
         return redirect("/cards");
+    }
+
+
+    public function saveSObject($contactId, $pProfileId, $pProfile) {
+
+        $expDate = $pProfile->expYear . "-" . $pProfile->expMonth;
+        $isUpdate = !empty($pProfile->id);
+
+        if($isUpdate) {
+
+            $query = "SELECT Id from PaymentProfile__c WHERE ExternalId__c = '$pProfileId'";
+            $resp = $this->api->query($query);
+    
+            if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
+    
+            $id = $resp->getRecord()["Id"];
+        }
+
+        $paymentProfile = new stdClass();
+        $paymentProfile->Id = $id;
+        $paymentProfile->Contact__c = $contactId;
+        $paymentProfile->ExpirationDate__c = $expDate;
+        $paymentProfile->ExternalId__c = $pProfileId;
+        $paymentProfile->PaymentGateway__c = "Authorize.net";
+
+        $resp = $this->api->upsert("PaymentProfile__c", $paymentProfile);
+
+        return $resp;
     }
 }
