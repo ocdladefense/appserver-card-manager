@@ -9,6 +9,7 @@
         "AuthNetResponse.php",
         "AuthNetClient.php",
         "PaymentProfile.php",
+        "PaymentProfileEx.php",
         "PaymentProfile__c.php",
         "MerchantAuthentication.php",
         "PaymentProfileManagerException.php"
