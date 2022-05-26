@@ -81,7 +81,7 @@ class PaymentProfile {
     public function expYear() {
 
         $date = new DateTime($this->expirationDate);
-        return $date->format("yy");
+        return $date->format("Y");
     }
 
     public function expMonth() {

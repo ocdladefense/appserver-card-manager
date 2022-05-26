@@ -32,7 +32,7 @@
                     </p>
 
                     <p>Card ending in &bull;&bull;&bull;&bull; <?php print $card->lastFour(); ?></p>
-                    <p>Expires on: <?php print $card->expiresOn(); ?></p>
+                    <p>Expires on: <?php print $card->expMonth() . "-" . $card->expYear() ?></p>
 
                     <div class="section mb-4 mt-2">
                         <p><strong>Billing Information</strong></p>
