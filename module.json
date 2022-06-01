@@ -22,9 +22,7 @@
 	"routes": {
         "cards":{
             "callback":"list",
-            "content-type":"text/html",
-            "access": "is_authenticated",
-            "authorization": "webserver"
+            "content-type":"text/html"
         },
         "card/create":{
             "callback":"edit",
