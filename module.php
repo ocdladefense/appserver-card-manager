@@ -110,12 +110,9 @@ class PaymentProfileManagerModule extends Module {
         $paymentType->setCreditCard($card);
         
 
-        // LEFT OFF HERE!!!!
         $billTo = $this->getBillTo($data);
 
         $paymentProfile = new AuthNetAPI\CustomerPaymentProfileType();
-
-        if($isUpdate) $paymentProfile->setCustomerPaymentProfileId($data->id);
 
         $paymentProfile->setCustomerType('individual');
         $paymentProfile->setBillTo($billTo);
@@ -132,10 +129,9 @@ class PaymentProfileManagerModule extends Module {
         
         $resp = $client->send($req);
 
-        if(true) {
-            $paymentProfileId = empty($data->id) ? $resp->getCustomerPaymentProfileId() : $data->id;
-            $this->savePaymentProfile__c($paymentProfileId, $data);
-        }
+        if(!$resp->success()) throw new Exception($resp->getErrorMessage());
+
+        if(true) $this->savePaymentProfile__c($resp->getCustomerPaymentProfileId(), $data);
         
         return redirect("/cards");
     }
@@ -195,6 +191,7 @@ class PaymentProfileManagerModule extends Module {
 
 
         $api = $this->loadForceApi();
+        $query = "SELECT ";
         $paymentProfile__c = new PaymentProfile__c($api);
         $resp = $paymentProfile__c->save($contactId, $paymentProfileId, $data);
 
@@ -337,5 +334,22 @@ class PaymentProfileManagerModule extends Module {
         $resp = $this->api->upsert("PaymentProfile__c", $paymentProfile);
 
         return $resp;
+    }
+
+
+    public function getBillTo($data) {
+
+        $billto = new AuthNetAPI\CustomerAddressType();
+        $billto->setFirstName($data->firstName);
+        $billto->setLastName($data->lastName);
+        // $billto->setCompany("Souveniropolis");
+        $billto->setAddress($data->address);
+        $billto->setCity($data->city);
+        $billto->setState($data->state);
+        $billto->setZip($data->zip);
+        $billto->setCountry("USA");
+        $billto->setPhoneNumber($data->phone);
+
+        return $billto;
     }
 }
