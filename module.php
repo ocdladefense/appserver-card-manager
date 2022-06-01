@@ -189,11 +189,31 @@ class PaymentProfileManagerModule extends Module {
 
     public function savePaymentProfile__c($paymentProfileId, $data) {
 
-
         $api = $this->loadForceApi();
-        $query = "SELECT ";
-        $paymentProfile__c = new PaymentProfile__c($api);
-        $resp = $paymentProfile__c->save($contactId, $paymentProfileId, $data);
+        $expDate = $data->expYear . "-" . $data->expMonth;
+        $isUpdate = !empty($data->id);
+        $contactId = $this->user->getContactId();
+
+        if($isUpdate) {
+
+            $query = "SELECT Id from PaymentProfile__c WHERE ExternalId__c = '$pProfileId'";
+            $resp = $this->api->query($query);
+    
+            if(!$resp->success()) throw new PaymentProfileManagerException($resp->getErrorMessage());
+    
+            $id = $resp->getRecord()["Id"];
+        }
+
+        $paymentProfile = new stdClass();
+        $paymentProfile->Id = $id;
+        $paymentProfile->Contact__c = $contactId;
+        $paymentProfile->ExpirationDate__c = $expDate;
+        $paymentProfile->ExternalId__c = $paymentProfileId;
+        $paymentProfile->PaymentGateway__c = "Authorize.net";
+
+        $resp = $api->upsert("PaymentProfile__c", $paymentProfile);
+
+        return $resp;
 
     
     }
