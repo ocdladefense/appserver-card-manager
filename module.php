@@ -2,6 +2,7 @@
 
 use function Mysql\select;
 use net\authorize\api\constants\ANetEnvironment as AuthNetEnvironment;
+use net\authorize\api\contract\v1 as AuthNetAPI;
 
 
 
@@ -25,8 +26,6 @@ class PaymentProfileManagerModule extends Module {
         $this->profileId = $this->user->getExternalCustomerProfileId();
 
         $this->env = AUTHORIZE_DOT_NET_USE_PRODUCTION_ENDPOINT ? AuthNetEnvironment::PRODUCTION : AuthNetEnvironment::SANDBOX; 
-        
-        // $this->customerProfileService = CustomerProfileService::newFromEnvironment($this->env, $this->profileId);
 
         $this->hasAuthorizeDotNet = !empty($this->user->getExternalCustomerProfileId());
 
@@ -90,12 +89,6 @@ class PaymentProfileManagerModule extends Module {
     }
 
 
-    public function foobar(){
-
-        var_dump("ffo");exit;
-    }
-
-
 
     public function save() {
 
@@ -104,6 +97,47 @@ class PaymentProfileManagerModule extends Module {
         $isUpdate = !empty($data->id);
 
         return $isUpdate ? $this->update($data) : $this->insert($data);
+    }
+
+
+    public function insert($data) {
+
+        $card = new AuthNetAPI\CreditCardType();
+        $card->setCardNumber($data->cardNumber);
+        $card->setExpirationDate($data->expYear . "-" . $data->expMonth);
+
+        $paymentType = new AuthNetAPI\PaymentType();
+        $paymentType->setCreditCard($card);
+        
+
+        // LEFT OFF HERE!!!!
+        $billTo = $this->getBillTo($data);
+
+        $paymentProfile = new AuthNetAPI\CustomerPaymentProfileType();
+
+        if($isUpdate) $paymentProfile->setCustomerPaymentProfileId($data->id);
+
+        $paymentProfile->setCustomerType('individual');
+        $paymentProfile->setBillTo($billTo);
+        $paymentProfile->setPayment($paymentType);
+        $paymentProfile->setDefaultPaymentProfile($isDefault);
+
+        $requestType = "CreateCustomerPaymentProfile";
+
+        $req = new AuthNetRequest("authnet://$requestType");
+        $req->addProperty("customerProfileId", $this->profileId);
+        $req->addProperty("paymentProfile", $paymentProfile);
+        
+        $client = new AuthNetClient($this->env);
+        
+        $resp = $client->send($req);
+
+        if(true) {
+            $paymentProfileId = empty($data->id) ? $resp->getCustomerPaymentProfileId() : $data->id;
+            $this->savePaymentProfile__c($paymentProfileId, $data);
+        }
+        
+        return redirect("/cards");
     }
 
 
@@ -153,48 +187,7 @@ class PaymentProfileManagerModule extends Module {
 
 
 
-    public function insert($data) {
 
-
-        $isDefault = !empty($data->default);
-
-        $card = new AuthNetAPI\CreditCardType();
-        $card->setCardNumber($data->cardNumber);
-        $card->setExpirationDate($data->expYear . "-" . $data->expMonth);
-
-        $paymentType = new AuthNetAPI\PaymentType();
-        $paymentType->setCreditCard($creditCard);
-        
-
-        // LEFT OFF HERE!!!!
-        $billTo = $this->getBillTo($data);
-
-        $paymentProfile = $isUpdate ? new AuthNetAPI\CustomerPaymentProfileExType() : new AuthNetAPI\CustomerPaymentProfileType();
-
-        if($isUpdate) $paymentProfile->setCustomerPaymentProfileId($data->id);
-
-        $paymentProfile->setCustomerType('individual');
-        $paymentProfile->setBillTo($billTo);
-        $paymentProfile->setPayment($paymentType);
-        $paymentProfile->setDefaultPaymentProfile($isDefault);
-
-        $requestType = $isUpdate ? "UpdateCustomerPaymentProfile" : "CreateCustomerPaymentProfile";
-
-        $req = new AuthNetRequest("authnet://$requestType");
-        $req->addProperty("customerProfileId", $this->profileId);
-        $req->addProperty("paymentProfile", $paymentProfile);
-        
-        $client = new AuthNetClient($this->env);
-        
-        $resp = $client->send($req);
-
-        if(true) {
-            $paymentProfileId = empty($data->id) ? $resp->getCustomerPaymentProfileId() : $data->id;
-            $this->savePaymentProfile__c($paymentProfileId, $data);
-        }
-        
-        return redirect("/cards");
-    }
 
 
 
