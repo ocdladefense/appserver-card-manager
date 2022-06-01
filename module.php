@@ -12,8 +12,6 @@ class PaymentProfileManagerModule extends Module {
 
     private $env;
 
-    private $customerProfileService;
-
     private $profileId;
 
     private $hasAuthorizeDotNet;
