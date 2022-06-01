@@ -9,6 +9,8 @@ use net\authorize\api\contract\v1 as AuthNetAPI;
 class PaymentProfileManagerModule extends Module {
 
     const SHOW_EXPIRATION_DATES = true;
+    const SAVE_NEW_CUSTOMER_PROFILES_TO_SALESFORCE = true;
+    const UPDATE_PAYMENT_PROFILE__C_S_OBJECTS = true;
 
     private $env;
 
@@ -40,7 +42,7 @@ class PaymentProfileManagerModule extends Module {
 
         if(!$this->hasAuthorizeDotNet && !AUTHORIZE_DOT_NET_AUTO_ENROLL) {
 
-            $message = "Your don't have an Authorize.net customer profile.  Click <a href='$url'>here</a> to auto-enroll.";
+            $message = "You don't have an Authorize.net customer profile.  Click <a href='$url'>here</a> to auto-enroll.";
 
             throw new Exception($message);
 
@@ -127,7 +129,7 @@ class PaymentProfileManagerModule extends Module {
 
         if(!$resp->success()) throw new Exception($resp->getErrorMessage());
 
-        if(true) $this->savePaymentProfile__c($resp->getCustomerPaymentProfileId(), $data);
+        if(self::UPDATE_PAYMENT_PROFILE__C_S_OBJECTS) $this->savePaymentProfile__c($resp->getCustomerPaymentProfileId(), $data);
         
         return redirect("/cards");
     }
@@ -160,7 +162,7 @@ class PaymentProfileManagerModule extends Module {
         
         $resp = $client->send($req);
 
-        if(true) $this->savePaymentProfile__c($data->id, $data);
+        if(self::UPDATE_PAYMENT_PROFILE__C_S_OBJECTS) $this->savePaymentProfile__c($data->id, $data);
 
         return redirect("/cards");
     }
@@ -219,7 +221,7 @@ class PaymentProfileManagerModule extends Module {
         if(!$resp->success()) throw new Exception($resp->getErrorMessage());
 
 
-        if(true) {
+        if(self::UPDATE_PAYMENT_PROFILE__C_S_OBJECTS) {
             $api = $this->loadForceApi();
             $query = "SELECT Id FROM PaymentProfile__c WHERE ExternalId__c = '$id'";
             $resp = $api->query($query);
@@ -298,16 +300,10 @@ class PaymentProfileManagerModule extends Module {
         $contactId = $contact["Id"];
         $email = $contact["Email"];
 
-        $params = [
-            "description" => $accountName,
-            "customerId"  => $contactId,
-            "email"       => $email
-        ];
-
         $profile = new AuthNetApi\CustomerProfileType();
-        $profile->setDescription($params["description"]);
-        $profile->setMerchantCustomerId($params["customerId"]);
-        $profile->setEmail($params["email"]);
+        $profile->setDescription($accountName);
+        $profile->setMerchantCustomerId($contactId);
+        $profile->setEmail($email);
 
         $req = new AuthNetRequest("authnet://CreateCustomerProfile");
         $req->addProperty("profile", $profile);
@@ -318,14 +314,16 @@ class PaymentProfileManagerModule extends Module {
         $profileId = $resp->getProfileId();
 
 
-        if(true) {
+        if(self::SAVE_NEW_CUSTOMER_PROFILES_TO_SALESFORCE) {
             $contact = new stdClass();
             $contact->Id = $contactId;
             $contact->AuthorizeDotNetCustomerProfileId__c = $profileId;
 
             $resp = $api->upsert("Contact", $contact);
         }
-        // Need to reload the user in the session!!!!!
+        
+        $this->user->setExternalCustomerProfileId($profileId);
+        \Session::setUser($this->user);
 
         return redirect("/cards");
     }
