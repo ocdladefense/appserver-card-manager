@@ -26,11 +26,9 @@
             "access": "is_authenticated",
             "authorization": "webserver"
         },
-        "card/%id":{
-            "callback":"read",
-            "content-type":"text/html",
-            "access": false,
-            "authorization": "webserver"
+        "card/create":{
+            "callback":"edit",
+            "content-type":"text/html"
         },
         "card/%id/edit":{
             "callback":"edit",
@@ -39,6 +37,11 @@
         "card/save":{
             "callback":"save",
             "content-type":"text/html"
+        },
+        "card/foobar":{
+            "callback":"foobar",
+            "content-type":"text/html",
+            "access": true
         },
         "card/%id/delete":{
             "callback":"delete",

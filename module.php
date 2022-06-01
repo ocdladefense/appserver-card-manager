@@ -90,6 +90,12 @@ class PaymentProfileManagerModule extends Module {
     }
 
 
+    public function foobar(){
+
+        var_dump("ffo");exit;
+    }
+
+
 
     public function save() {
 
@@ -209,15 +215,17 @@ class PaymentProfileManagerModule extends Module {
 
         $req = new AuthNetRequest("authnet://DeleteCustomerPaymentProfile");
         $req->addProperty("customerProfileId", $this->profileId);
-        $req->addProperty("customerPaymentProfileId", $paymentProfileId);
+        $req->addProperty("customerPaymentProfileId", $id);
         
         $client = new AuthNetClient($this->env);
         $resp = $client->send($req);
 
+        if(!$resp->success()) throw new Exception($resp->getErrorMessage());
+
 
         if(true) {
             $api = $this->loadForceApi();
-            $query = "SELECT Id FROM PaymentProfile__c WHERE ExternalId__c = '$externalId'";
+            $query = "SELECT Id FROM PaymentProfile__c WHERE ExternalId__c = '$id'";
             $resp = $api->query($query);
             $recordId = $resp->getRecord()["Id"];
     
