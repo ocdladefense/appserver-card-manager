@@ -101,19 +101,16 @@ class PaymentProfileManagerModule extends Module {
 
     public function insert($data) {
 
-
         $card = new AuthNetAPI\CreditCardType();
         $card->setCardNumber($data->cardNumber);
         $card->setExpirationDate($data->expYear . "-" . $data->expMonth);
 
         $paymentType = new AuthNetAPI\PaymentType();
         $paymentType->setCreditCard($card);
-        
 
         $billTo = $this->getBillTo($data);
 
         $paymentProfile = new AuthNetAPI\CustomerPaymentProfileType();
-
         $paymentProfile->setCustomerType('individual');
         $paymentProfile->setBillTo($billTo);
         $paymentProfile->setPayment($paymentType);
