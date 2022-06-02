@@ -36,11 +36,6 @@
             "callback":"save",
             "content-type":"text/html"
         },
-        "card/foobar":{
-            "callback":"foobar",
-            "content-type":"text/html",
-            "access": true
-        },
         "card/%id/delete":{
             "callback":"delete",
             "content-type":"text/html"
