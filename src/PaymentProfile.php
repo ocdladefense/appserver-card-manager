@@ -1,5 +1,7 @@
 <?php
 
+use net\authorize\api\contract\v1\CustomerPaymentProfileBaseType;
+
 class PaymentProfile {
 
 
@@ -26,26 +28,31 @@ class PaymentProfile {
 
     public function __construct(){}
 
-    public static function fromMaskedArray($masked) {
+    public static function fromCustomerPaymentProfileBaseType(CustomerPaymentProfileBaseType $paymentProfile) {
 
         $profile = new self();
-        $profile->setDefault($masked->getDefaultPaymentProfile());
-        $profile->id = $masked->getCustomerPaymentProfileId();
-        $profile->cardType = $masked->getPayment()->getCreditCard()->getCardType();
-        $profile->cardNumber = $masked->getPayment()->getCreditCard()->getCardNumber();
-        $profile->expirationDate = $masked->getPayment()->getCreditCard()->getExpirationDate();
+        $profile->setDefault($paymentProfile->getDefaultPaymentProfile());
+
+        if(method_exists($paymentProfile, "getCustomerPaymentProfileId")) {
+
+            $profile->id = $paymentProfile->getCustomerPaymentProfileId();
+        }
+
+        $profile->cardType = $paymentProfile->getPayment()->getCreditCard()->getCardType();
+        $profile->cardNumber = $paymentProfile->getPayment()->getCreditCard()->getCardNumber();
+        $profile->expirationDate = $paymentProfile->getPayment()->getCreditCard()->getExpirationDate();
 
         $profile->dateIsMasked = self::isMaskedDate($profile->expirationDate);
         if(!$profile->dateIsMasked) $profile->date = new DateTime($profile->expirationDate);
 
-        $profile->setPaymentProfileBillingInfo($masked->getBillTo());
+        $profile->setPaymentProfileBillingInfo($paymentProfile->getBillTo());
 
         return $profile;
     }
 
-    public static function fromMaskedArrays($masked) {
+    public static function fromCustomerPaymentProfileBaseTypes($paymentProfiles) {
 
-        $values = array_map("PaymentProfile::fromMaskedArray", $masked);
+        $values = array_map("PaymentProfile::fromCustomerPaymentProfileBaseType", $paymentProfiles);
 
         $keys = array_map(function($p){
 

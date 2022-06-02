@@ -49,6 +49,24 @@
             "content-type":"text/html",
             "access": false,
             "authorization": "webserver"
+        },
+        "record/%recordType/view":{
+            "callback":"view",
+            "content-type":"text/html",
+            "access": false,
+            "authorization": "webserver"
+        },
+        "record/%recordType/delete":{
+            "callback":"delete",
+            "content-type":"text/html",
+            "access": false,
+            "authorization": "webserver"
+        },
+        "record/%recordType/save":{
+            "callback":"save",
+            "content-type":"text/html",
+            "access": false,
+            "authorization": "webserver"
         }
     }
 }

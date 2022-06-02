@@ -50,7 +50,7 @@ class AuthNetResponse {
     public function getPaymentProfile() {
 
         $profile = $this->response->getPaymentProfile();
-        return PaymentProfile::fromMaskedArray($profile);
+        return PaymentProfile::fromCustomerPaymentProfileBaseType($profile);
     }
 
     public function getCustomerPaymentProfileId() {
@@ -62,7 +62,7 @@ class AuthNetResponse {
 
         $payments = $this->getProfile()->getPaymentProfiles();
         
-        return PaymentProfile::fromMaskedArrays($payments);
+        return PaymentProfile::fromCustomerPaymentProfileBaseTypes($payments);
     }
 
 

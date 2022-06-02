@@ -234,7 +234,7 @@ class PaymentProfileManagerModule extends Module {
     // Shows one profile in an editable form.
     public function edit($id = null) {
 
-        $profile = null;
+        $profile = new PaymentProfile();
 
         if(!empty($id)) {
 
@@ -246,6 +246,7 @@ class PaymentProfileManagerModule extends Module {
             $resp = $client->send($req);
     
             $profile = $resp->getPaymentProfile();
+            
 
             if(self::SHOW_EXPIRATION_DATES) {
                 $api = $this->loadForceApi();
@@ -255,7 +256,7 @@ class PaymentProfileManagerModule extends Module {
             }
         }
 
-        $tpl = empty($id) ? new Template("create") : new Template("edit");
+        $tpl = new Template("edit");
         $tpl->addPath(__DIR__ . "/templates");
 
         return $tpl->render(["profile" => $profile]);

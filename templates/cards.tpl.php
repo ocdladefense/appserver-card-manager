@@ -59,3 +59,5 @@
 
     </div>
 </div>
+
+<!-- <?php module_template("record", __DIR__, $record); ?> -->
