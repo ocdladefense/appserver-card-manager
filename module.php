@@ -118,18 +118,18 @@ class PaymentProfileManagerModule extends Module {
         // LEFT OFF HERE!!!!
         $billTo = $this->getBillTo($data);
 
-        $paymentProfile = $isUpdate ? new AuthNetAPI\CustomerPaymentProfileExType() : new AuthNetAPI\CustomerPaymentProfileType();
+        $paymentProfile = new AuthNetAPI\CustomerPaymentProfileExType();
 
-        if($isUpdate) $paymentProfile->setCustomerPaymentProfileId($data->id);
+        $paymentProfile->setCustomerPaymentProfileId($data->id);
 
         $paymentProfile->setCustomerType('individual');
         $paymentProfile->setBillTo($billTo);
         $paymentProfile->setPayment($paymentType);
         $paymentProfile->setDefaultPaymentProfile($isDefault);
 
-        $requestType = $isUpdate ? "UpdateCustomerPaymentProfile" : "CreateCustomerPaymentProfile";
+    
 
-        $req = new AuthNetRequest("authnet://$requestType");
+        $req = new AuthNetRequest("authnet://UpdateCustomerPaymentProfile");
         $req->addProperty("customerProfileId", $this->profileId);
         $req->addProperty("paymentProfile", $paymentProfile);
         
@@ -163,18 +163,14 @@ class PaymentProfileManagerModule extends Module {
         // LEFT OFF HERE!!!!
         $billTo = $this->getBillTo($data);
 
-        $paymentProfile = $isUpdate ? new AuthNetAPI\CustomerPaymentProfileExType() : new AuthNetAPI\CustomerPaymentProfileType();
-
-        if($isUpdate) $paymentProfile->setCustomerPaymentProfileId($data->id);
+        $paymentProfile = new AuthNetAPI\CustomerPaymentProfileType();
 
         $paymentProfile->setCustomerType('individual');
         $paymentProfile->setBillTo($billTo);
         $paymentProfile->setPayment($paymentType);
         $paymentProfile->setDefaultPaymentProfile($isDefault);
 
-        $requestType = $isUpdate ? "UpdateCustomerPaymentProfile" : "CreateCustomerPaymentProfile";
-
-        $req = new AuthNetRequest("authnet://$requestType");
+        $req = new AuthNetRequest("authnet://CreateCustomerPaymentProfile");
         $req->addProperty("customerProfileId", $this->profileId);
         $req->addProperty("paymentProfile", $paymentProfile);
         
@@ -260,6 +256,36 @@ class PaymentProfileManagerModule extends Module {
     }
 
 
+
+
+    // Shows one profile in an editable form.
+    public function editRecord($type, $id = null) {
+
+
+        // Check for post data and if present then save?
+        // Do the save and return $this->view($type);
+        // Or return whatever is in the ?retURL querystring.
+        $record = null;
+        $type = "PaymentMethod";
+        //  $action = CRUD
+
+        // $record = !empty($id) ? $this->loadAppropriateRecordObject($id) : $this->loadAppropriateEmptyRecordObject();
+
+        $record = empty($id) ? new stdClass() : $this->loadRecord($type);
+
+        $tplType = empty($id) ? "create" : "edit";
+
+        $tplName = implode("-",[$type,$tplType]);
+
+        $tpl = new Template($tplName);
+        $tpl->addPath(__DIR__ . "/templates");
+
+        return $tpl->render(["record" => $record]);
+    }
+
+    private function loadRecord($type) {
+        return new stdClass();
+    }
 
 
     public function saveCustomer($contactId) {

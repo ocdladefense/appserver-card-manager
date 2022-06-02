@@ -49,9 +49,15 @@
             "content-type":"text/html"
         },
         "record/%recordType/edit":{
-            "callback":"edit",
+            "callback":"editRecord",
             "content-type":"text/html",
-            "access": false,
+            "access": true,
+            "authorization": "webserver"
+        },
+        "record/%recordType/edit/%recordId":{
+            "callback":"editRecord",
+            "content-type":"text/html",
+            "access": true,
             "authorization": "webserver"
         }
     }
