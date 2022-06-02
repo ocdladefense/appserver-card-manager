@@ -159,6 +159,8 @@ class PaymentProfileManagerModule extends Module {
         
         $resp = $client->send($req);
 
+        if(!$resp->success()) throw new Exception($resp->getErrorMessage());
+
         if(self::UPDATE_PAYMENT_PROFILE__C_S_OBJECTS) $this->savePaymentProfile__c($data->id, $data);
 
         return redirect("/cards");
