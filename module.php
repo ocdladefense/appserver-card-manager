@@ -110,13 +110,17 @@ class PaymentProfileManagerModule extends Module {
 
         $billTo = $this->getBillTo($data);
 
+
         $paymentProfile = new AuthNetAPI\CustomerPaymentProfileType();
+
         $paymentProfile->setCustomerType('individual');
         $paymentProfile->setBillTo($billTo);
         $paymentProfile->setPayment($paymentType);
         $paymentProfile->setDefaultPaymentProfile(!empty($data->default));
 
+
         $req = new AuthNetRequest("authnet://CreateCustomerPaymentProfile");
+
         $req->addProperty("customerProfileId", $this->profileId);
         $req->addProperty("paymentProfile", $paymentProfile);
         
@@ -144,6 +148,7 @@ class PaymentProfileManagerModule extends Module {
 
         $billTo = $this->getBillTo($data);
 
+
         $paymentProfile = new AuthNetAPI\CustomerPaymentProfileExType();
         $paymentProfile->setCustomerPaymentProfileId($data->id);
         $paymentProfile->setCustomerType('individual');
@@ -152,6 +157,7 @@ class PaymentProfileManagerModule extends Module {
         $paymentProfile->setDefaultPaymentProfile(!empty($data->default));
 
         $req = new AuthNetRequest("authnet://UpdateCustomerPaymentProfile");
+
         $req->addProperty("customerProfileId", $this->profileId);
         $req->addProperty("paymentProfile", $paymentProfile);
         
@@ -277,6 +283,36 @@ class PaymentProfileManagerModule extends Module {
         $billto->setPhoneNumber($data->phone);
 
         return $billto;
+    }
+
+
+    // Shows one profile in an editable form.
+    public function editRecord($type, $id = null) {
+
+
+        // Check for post data and if present then save?
+        // Do the save and return $this->view($type);
+        // Or return whatever is in the ?retURL querystring.
+        $record = null;
+        $type = "PaymentMethod";
+        //  $action = CRUD
+
+        // $record = !empty($id) ? $this->loadAppropriateRecordObject($id) : $this->loadAppropriateEmptyRecordObject();
+
+        $record = empty($id) ? new stdClass() : $this->loadRecord($type);
+
+        $tplType = empty($id) ? "create" : "edit";
+
+        $tplName = implode("-",[$type,$tplType]);
+
+        $tpl = new Template($tplName);
+        $tpl->addPath(__DIR__ . "/templates");
+
+        return $tpl->render(["record" => $record]);
+    }
+
+    private function loadRecord($type) {
+        return new stdClass();
     }
 
 
