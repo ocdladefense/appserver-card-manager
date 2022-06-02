@@ -168,10 +168,6 @@ class PaymentProfileManagerModule extends Module {
 
 
 
-
-
-
-
     public function savePaymentProfile__c($paymentProfileId, $data) {
 
         $api = $this->loadForceApi();
