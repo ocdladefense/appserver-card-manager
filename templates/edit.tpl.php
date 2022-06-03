@@ -1,14 +1,12 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 
-
+<?php
+    $header = empty($profile->id()) ? "New Payment Method" : "Edit Payment Method";
+?>
 
 <div class="container px-5">
 
-    <h2>Edit Payment Method</h2>
-
-    <?php if(!empty($message)) : ?>
-        <h3><?php print $message; ?></h3>
-    <?php endif; ?>
+    <h2><?php print $header; ?></h2>
 
     <form method="post" action="/card/save" enctype="multipart/form-data">
 
@@ -138,10 +136,8 @@
 
                 <div class="row">
                     <div class="mt-4 mb-4">
-                        <button class="btn btn-success px-3 mx-4" type="submit">Update Card</button>
-                        <button class="btn btn-secondary px-3 mx-4" type="button" onClick="history.go(-1);">
-                            &nbsp;&nbsp;&nbsp;Cancel&nbsp;&nbsp;&nbsp;
-                        </button>
+                        <button class="btn btn-success px-3 mx-4" type="submit">&nbsp;&nbsp;Save&nbsp;&nbsp;</button>
+                        <button class="btn btn-secondary px-3 mx-4" type="button" onClick="history.go(-1);">Cancel</button>
                     </div>
                 </div>
 

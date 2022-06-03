@@ -50,7 +50,6 @@ class PaymentProfileManagerModule extends Module {
 
             return redirect($url);
         }
-        
 
         $req = new AuthNetRequest("authnet://GetCustomerProfile");
         $req->addProperty("customerProfileId", $this->profileId);
@@ -58,6 +57,8 @@ class PaymentProfileManagerModule extends Module {
         $client = new AuthNetClient($this->env);
 
         $resp = $client->send($req);
+
+        if(!$resp->success()) throw new Exception($resp->getErrorMessage());
 
         $payments = $resp->getPaymentProfiles();
 
@@ -78,7 +79,15 @@ class PaymentProfileManagerModule extends Module {
                 $pp = $payments[$sObject["ExternalId__c"]];
                 $pp->setExpirationDate($sObject["ExpirationDate__c"]);
             }
-        } 
+        }
+
+        // $profileTemplates = [];
+        // foreach($payments as $payment) {
+
+        //     $tpl = new Template("card");
+        //     $tpl->addPath(__DIR__ . "/templates");
+        //     $profileTemplates[] = $tpl->render(["card" => $payment]);
+        // }
 
 
         $tpl = new Template("cards");
@@ -359,4 +368,10 @@ class PaymentProfileManagerModule extends Module {
 
         return redirect("/cards");
     }
+}
+
+function recordPreprocess($paymentData) {
+
+    return ["card" => $paymentData];
+
 }

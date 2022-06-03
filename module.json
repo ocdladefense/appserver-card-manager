@@ -8,8 +8,6 @@
         "AuthNetResponse.php",
         "AuthNetClient.php",
         "PaymentProfile.php",
-        "PaymentProfileEx.php",
-        "CustomerAddress.php",
         "MerchantAuthentication.php",
         "PaymentProfileException.php"
     ],

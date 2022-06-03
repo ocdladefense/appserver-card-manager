@@ -9,7 +9,6 @@ class PaymentProfile {
     public $id;
     public $cardType;
     public $cardNumber;
-    public $lastFour;
     public $expirationDate;
     public $date;
     public $unmaskedExpirationDate;
@@ -111,10 +110,14 @@ class PaymentProfile {
 
     public function expYear() {
 
+        if(empty($this->id)) return "";
+
         return $this->dateIsMasked ? "XX" : $this->date->format("Y");
     }
 
     public function expMonth() {
+
+        if(empty($this->id)) return "";
 
         return $this->dateIsMasked ? "XX" : $this->date->format("m");
     }
