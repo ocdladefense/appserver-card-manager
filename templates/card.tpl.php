@@ -3,10 +3,14 @@
 <div class="card m-1">
     <div class="card-body">
         
-        <p class="card-title">
-            <?php print $card->firstName() . " " . $card->lastName() . "'s " . $card->type(); ?>
-            <?php if($card->isDefault()) print "<i class='fa-solid fa-square-check'></i>"; ?> 
-        </p>
+        <div class="row">
+            <p class="card-title col">
+                <?php print $card->firstName() . " " . $card->lastName() . "'s " . $card->type(); ?>
+                <?php if($card->isDefault()) : ?>
+                    <i class='fa-solid fa-square-check col'></i>
+                <?php endif; ?>
+            </p>
+        </div>
 
         <p>Card ending in &bull;&bull;&bull;&bull; <?php print $card->lastFour(); ?></p>
         <p>Expires on: <?php print $card->expMonth() . "-" . $card->expYear() ?></p>
