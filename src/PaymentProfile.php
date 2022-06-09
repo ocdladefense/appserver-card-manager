@@ -181,6 +181,8 @@ class PaymentProfile {
 
     public function setExpirationDate($date) {
 
+        //var_dump($date);exit;
+
         $this->dateIsMasked = false;
         $this->date = new DateTime($date);
     }

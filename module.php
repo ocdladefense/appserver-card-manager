@@ -81,14 +81,6 @@ class PaymentProfileManagerModule extends Module {
             }
         }
 
-        // $profileTemplates = [];
-        // foreach($payments as $payment) {
-
-        //     $tpl = new Template("card");
-        //     $tpl->addPath(__DIR__ . "/templates");
-        //     $profileTemplates[] = $tpl->render(["card" => $payment]);
-        // }
-
 
         $tpl = new Template("cards");
         $tpl->addPath(__DIR__ . "/templates");
@@ -267,7 +259,7 @@ class PaymentProfileManagerModule extends Module {
                 $api = $this->loadForceApi();
                 $query = "SELECT ExpirationDate__c FROM PaymentProfile__c WHERE ExternalId__c = '$id'";
                 $sfpp = $api->query($query)->getRecord();
-                $profile->setExpirationDate($sfpp["ExpirationDate__c"]);
+                if(!empty($sfpp)) $profile->setExpirationDate($sfpp["ExpirationDate__c"]);
             }
         }
 

@@ -1,12 +1,11 @@
 
-<?php $default = $card->isDefault() ? "default" : ""; ?>
 
-<div class="card m-1 <?php print $default; ?>">
+<div class="card m-1">
     <div class="card-body">
         
         <p class="card-title">
             <?php print $card->firstName() . " " . $card->lastName() . "'s " . $card->type(); ?>
-            <?php if($card->isDefault()) print "(default)"; ?> 
+            <?php if($card->isDefault()) print "<i class='fa-solid fa-square-check'></i>"; ?> 
         </p>
 
         <p>Card ending in &bull;&bull;&bull;&bull; <?php print $card->lastFour(); ?></p>
